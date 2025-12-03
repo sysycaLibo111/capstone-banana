@@ -1,0 +1,1291 @@
+{% extends 'Fnavbase.html' %}
+{% load static %}
+
+{% block title %}BANAeScan - Scan Library{% endblock %}
+
+{% block navbar_title %}Scan Library{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary-gold: #FFB911;
+            --dark-green: #0F3D2E;
+            --medium-green: #1B5E47;
+            --light-green: #4CAF50;
+            --accent-orange: #FF8C42;
+            --bg-dark: #0A1F1A;
+            --bg-card: rgb(12, 75, 12);
+            --text-light: #FFFFFF;
+            --text-gold: #ffc821;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--medium-green) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Main background with overlay */
+        .main-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("{% static 'img/6.png' %}");
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(5px) brightness(0.7);
+            z-index: -2;
+        }
+
+        /* Dark overlay for better readability */
+
+        /* Ensure content stays above the background effects */
+        .main-container,
+        .nav-bar,
+        .language-selector {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(10, 31, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 185, 17, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-gold);
+            text-decoration: none;
+        }
+
+        .nav-logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 185, 17, 0.1);
+            color: var(--primary-gold);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        #language-switcher {
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary-gold);
+            background: var(--bg-card);
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        #language-switcher:hover {
+            background: rgba(255, 185, 17, 0.1);
+            border-color: var(--accent-orange);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero-title {
+
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-gold), #000000, var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(255, 185, 17, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Scanner Cards */
+        .scanner-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .scanner-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease;
+            text-decoration: none;
+            position: relative;
+            border: 1px solid rgba(255, 185, 17, 0.2);
+        }
+
+        .scanner-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--accent-orange), var(--light-green));
+        }
+
+        .scanner-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(255, 185, 17, 0.3);
+        }
+
+        .scanner-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .scanner-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .scanner-card-content {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .scanner-card-content h3 {
+            font-size: 1.6rem;
+            color: var(--primary-gold);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .scanner-card-content p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Library Section */
+        .library-section {
+            margin-top: 60px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 185, 17, 0.2);
+        }
+
+        .library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .library-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            flex: 1;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border-radius: 25px;
+            border: 2px solid var(--primary-gold);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input::placeholder {
+            color: rgba(19, 18, 18, 0.7);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 10px rgba(255, 185, 17, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-gold);
+            font-size: 1.2rem;
+        }
+
+        .knowledge-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 3fr));
+            gap: 25px;
+        }
+
+        .knowledge-card {
+            background: var(--bg-card);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(255, 185, 17, 0.2);
+        }
+
+        .knowledge-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(255, 185, 17, 0.3);
+        }
+
+        .knowledge-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .knowledge-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .knowledge-card-content {
+            padding: 20px;
+        }
+
+        .knowledge-card-content h4 {
+            font-size: 1.1rem;
+            color: var(--text-gold);
+            margin-bottom: 15px;
+            font-weight: 600;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+
+        .view-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-orange));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 185, 17, 0.4);
+        }
+
+        /* Enhanced Modal */
+        .modal-xl {
+            max-width: 1200px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 185, 17, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--medium-green));
+            color: var(--text-gold);
+            border-bottom: 2px solid rgba(255, 185, 17, 0.3);
+            padding: 25px 30px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .btn-close {
+            filter: invert(1);
+            opacity: 0.8;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .content-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid var(--primary-gold);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--primary-gold);
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-green));
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Resources Section */
+        .resources-section {
+            margin-top: 30px;
+        }
+
+        .doc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .doc-item {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .doc-item:hover {
+            background: rgba(255, 185, 17, 0.1);
+            transform: translateX(5px);
+        }
+
+        .doc-link {
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .doc-icon {
+            font-size: 1.5rem;
+            color: var(--primary-gold);
+        }
+
+        /* PDF specific styles */
+        .doc-item .fa-file-pdf {
+            color: #e74c3c !important;
+        }
+
+        .doc-item .fa-external-link-alt {
+            color: var(--primary-gold);
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .doc-item .fa-external-link-alt:hover {
+            opacity: 1;
+        }
+
+        /* Local file indicator */
+        .local-file {
+            position: relative;
+        }
+
+        .local-file::after {
+            content: '📁';
+            margin-left: 5px;
+            font-size: 0.8em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* PDF Viewer Modal */
+        .pdf-viewer-modal .modal-content {
+            background: var(--bg-dark);
+        }
+
+        .pdf-viewer-modal .modal-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--medium-green));
+        }
+
+        .pdf-viewer-modal iframe {
+            border-radius: 8px;
+            background: white;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .scanner-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .knowledge-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 767px) {
+            .nav-bar {
+                flex-direction: column;
+                padding: 15px 20px;
+            }
+
+            .nav-menu {
+                width: 100%;
+                justify-content: space-around;
+                margin-top: 15px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .library-title {
+                font-size: 2rem;
+            }
+
+            .knowledge-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .library-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .search-container {
+                max-width: 100%;
+            }
+
+            .language-selector {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 20px auto;
+                text-align: center;
+            }
+
+            #language-switcher {
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 20px 15px;
+            }
+
+            .scanner-cards {
+                gap: 20px;
+            }
+
+            .scanner-card-content {
+                padding: 20px;
+            }
+
+            .library-section {
+                padding: 20px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Background Elements -->
+    <div class="main-background"></div>
+    <div class="background-overlay"></div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="language-switcher" onchange="switchLanguage(this.value)">
+            <option value="en">English (EN)</option>
+            <option value="tl">Tagalog (TL)</option>
+        </select>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title" data-en="Discover Our Tools" data-tl="Tuklasin ang Aming Mga Kasangkapan"></h1>
+            <p class="hero-subtitle" data-en="Scan and learn about banana diseases and varieties" data-tl="I-scan at matuto tungkol sa mga sakit at uri ng saging">I-scan at matuto tungkol sa mga sakit at uri ng saging</p>
+        </div>
+
+        <!-- Scanner Cards -->
+        <div class="scanner-cards">
+            <a href="{% url 'banana_disease' %}" class="scanner-card">
+                <img src="{% static 'img/Disease.gif' %}" alt="Disease Scanner">
+                <div class="scanner-card-content">
+                    <h3 data-en="Disease Scanner" data-tl="Scanner ng Sakit">Scanner ng Sakit</h3>
+                    <p data-en="Identify banana diseases and get treatment advice" data-tl="Tukuyin ang mga sakit ng saging at makakuha ng mga payo sa paggamot">Tukuyin ang mga sakit ng saging at makakuha ng mga payo sa paggamot</p>
+                </div>
+            </a>
+            <a href="{% url 'banana_variety' %}" class="scanner-card">
+                <img src="{% static 'img/Variety.gif' %}" alt="Variety Scanner">
+                <div class="scanner-card-content">
+                    <h3 data-en="Variety Scanner" data-tl="Scanner ng Uri">Scanner ng Uri</h3>
+                    <p data-en="Identify banana varieties and their characteristics" data-tl="Matukoy ang mga uri ng saging at mga katangian nito">Matukoy ang mga uri ng saging at mga katangian nito</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Disease Library Section -->
+        <div class="library-section">
+            <div class="library-header">
+                <h2 class="library-title" data-en="Knowledge Library" data-tl="Aklatan ng Kaalaman">Aklatan ng Kaalaman</h2>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchBox" 
+                           data-en-placeholder="Search diseases..." 
+                           data-tl-placeholder="Maghanap ng mga sakit..."
+                           placeholder="Maghanap ng mga sakit...">
+                </div>
+            </div>
+
+            <div class="knowledge-grid" id="knowledgeContainer">
+                {% for knowledge in knowledges %}
+                <div class="knowledge-card">
+                    <img src="{{ knowledge.img|default:'/static/img/default-image.png' }}" 
+                         alt="{{ knowledge.title|default:'Unknown' }}"
+                         onerror="this.src='/static/img/default-image.png'">
+                    <div class="knowledge-card-content">
+                        <h4>{{ knowledge.title|default:"Untitled" }}</h4>
+                        <button class="view-btn" onclick="openModal(
+                            '{{ knowledge.title|escapejs }}',
+                            '{{ knowledge.img|default:""|escapejs }}',
+                            `{{ knowledge.definition|default:"No information available."|escapejs }}`,
+                            `{{ knowledge.control_prevention|default:"No information available."|escapejs }}`
+                        )">
+                            <i class="fas fa-eye"></i> 
+                            <span data-en="View Now" data-tl="Tingnan Ngayon">Tingnan Ngayon</span>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <h3 data-en="No Knowledge Available" data-tl="Walang Available na Kaalaman">Walang Available na Kaalaman</h3>
+                    <p data-en="No data available at the moment. Please try again later." data-tl="Walang data sa ngayon. Subukan muli mamaya.">Walang data sa ngayon. Subukan muli mamaya.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Variety Library Section -->
+        <div class="library-section" style="margin-top: 40px;">
+            <div class="library-header">
+                <h2 class="library-title" data-en="Banana Varieties Library" data-tl="Aklatan ng mga Uri ng Saging">Aklatan ng mga Uri ng Saging</h2>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="varietySearchBox"
+                           data-en-placeholder="Search varieties..." 
+                           data-tl-placeholder="Maghanap ng uri..."
+                           placeholder="Maghanap ng uri...">
+                </div>
+            </div>
+
+            <div class="knowledge-grid" id="varietyContainer">
+                {% for variety in fvarieties %}
+                <div class="knowledge-card variety-card">
+                    <img src="{{ variety.img|default:'/static/img/default-image.png' }}" 
+                         alt="{{ variety.title|default:'Unknown' }}"
+                         onerror="this.src='/static/img/default-image.png'">
+                    <div class="knowledge-card-content">
+                        <h4>{{ variety.title|default:"Untitled" }}</h4>
+                        <button class="view-btn" onclick="openVarietyModal(
+                            '{{ variety.title|escapejs }}',
+                            '{{ variety.img|default:""|escapejs }}',
+                            `{{ variety.description|default:"No information available."|escapejs }}`,
+                            '{{ variety.classification|default:""|escapejs }}',
+                            '{{ variety.origin|default:""|escapejs }}',
+                            '{{ variety.harvest_period|default:""|escapejs }}'
+                        )">
+                            <i class="fas fa-eye"></i> 
+                            <span data-en="View Details" data-tl="Tingnan ang Detalye">Tingnan ang Detalye</span>
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-seedling"></i>
+                    <h3 data-en="No Varieties Available" data-tl="Walang Available na Uri">Walang Available na Uri</h3>
+                    <p data-en="No variety data available at the moment. Please try again later." data-tl="Walang data ng uri sa ngayon. Subukan muli mamaya.">Walang data ng uri sa ngayon. Subukan muli mamaya.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease Knowledge Modal -->
+    <div class="modal fade" id="knowledgeModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Image Section -->
+                    <div class="content-section">
+                        <img id="modalImg" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px;" alt="">
+                    </div>
+
+                    <!-- Definition -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Definition" data-tl="Kahulugan">Kahulugan</h3>
+                        </div>
+                        <div id="definitionContent"></div>
+                    </div>
+
+                    <!-- Control & Prevention -->
+                    <div class="content-section" id="controlSection">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Control & Prevention" data-tl="Pagkontrol at Pag-iwas">Pagkontrol at Pag-iwas</h3>
+                        </div>
+                        <div id="controlContent"></div>
+                    </div>
+
+                    <!-- Educational Resources -->
+                    <div class="resources-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Educational Resources" data-tl="Karagdagang Sanggunian">Karagdagang Sanggunian</h3>
+                        </div>
+
+                        <!-- Documents List -->
+                        <ul class="doc-list" id="docList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Variety Modal -->
+    <div class="modal fade" id="varietyModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="varietyModalTitle"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Image Section -->
+                    <div class="content-section">
+                        <img id="varietyModalImg" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px;" alt="">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Description" data-tl="Paglalarawan">Paglalarawan</h3>
+                        </div>
+                        <div id="varietyDescriptionContent"></div>
+                    </div>
+
+                    <!-- Classification -->
+                    <div class="content-section" id="varietyClassificationSection">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Classification" data-tl="Klasipikasyon">Klasipikasyon</h3>
+                        </div>
+                        <div id="varietyClassificationContent"></div>
+                    </div>
+
+                    <!-- Origin -->
+                    <div class="content-section" id="varietyOriginSection">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Origin" data-tl="Pinagmulan">Pinagmulan</h3>
+                        </div>
+                        <div id="varietyOriginContent"></div>
+                    </div>
+
+                    <!-- Harvest Period -->
+                    <div class="content-section" id="varietyHarvestSection">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Harvest Period" data-tl="Panahon ng Pag-aani">Panahon ng Pag-aani</h3>
+                        </div>
+                        <div id="varietyHarvestContent"></div>
+                    </div>
+
+                    <!-- Educational Resources -->
+                    <div class="resources-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3 class="section-title" data-en="Educational Resources" data-tl="Karagdagang Sanggunian">Karagdagang Sanggunian</h3>
+                        </div>
+                        <ul class="doc-list" id="varietyDocList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Modal -->
+    <div class="modal fade pdf-viewer-modal" id="pdfViewerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfModalTitle">PDF Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfViewer" width="100%" height="600px" style="border: none; border-radius: 8px;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Language Management
+        const langSelect = document.getElementById("language-switcher");
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'tl';
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            const elements = document.querySelectorAll('[data-en]');
+            
+            elements.forEach(el => {
+                if (el.getAttribute(`data-${lang}`)) {
+                    if (el.tagName === 'INPUT' && el.hasAttribute(`data-${lang}-placeholder`)) {
+                        el.placeholder = el.getAttribute(`data-${lang}-placeholder`);
+                    } else {
+                        el.textContent = el.getAttribute(`data-${lang}`);
+                    }
+                }
+            });
+            
+            localStorage.setItem('selectedLanguage', lang);
+            updateEducationalResourcesLanguage();
+        }
+
+         const educationalResources = {
+            // Diseases - Documents only
+            'Banana Anthracnose Fruit Disease': {
+                docs: [
+                    { title: 'Anthracnose sa mga halaman: pagkilala, pag-iwas, at epektibong paggamot', url: "{% static 'doc/Anthracnose.pdf' %}", type: 'local' },
+                    { title: 'Anthracnose of Banana', url:"{% static 'doc/Anthracnose of Banana.pdf' %}", type: 'local' },
+                    { title: 'Research Paper - Colletotrichum musae', url: "{% static 'doc/Research Paper - Colletotrichum musae.pdf' %}", type: 'local'}
+                ]
+            },
+            'Banana Bract Mosaic Virus Disease': {
+                docs: [
+                    { title: 'CABI - Banana Bract Mosaic Virus', url: 'https://www.cabi.org/isc/datasheet/8608' },
+                    { title: 'BBrMV Prevention Guide', url: "{% static 'img/bract_mosaic_guide.pdf' %}", type: 'local' },
+                    { title: 'Philippine Journal Research', url: 'https://www.ukdr.uplb.edu.ph/journal-articles/3456/' }
+                ]
+            },
+            'Banana Fusarium Wilt Tree Disease': {
+                docs: [
+                    { title: 'World Banana Forum - Fusarium Wilt TR4', url: 'http://www.fao.org/world-banana-forum/projects/good-practices/fusarium-wilt/en/' },
+                    { title: 'Fusarium Wilt Management', url: "{% static 'img/fusarium_wilt_manual.pdf' %}", type: 'local' },
+                    { title: 'FAO - Managing Fusarium Wilt', url: 'https://www.fao.org/3/ca7575en/CA7575EN.pdf' }
+                ]
+            },
+            'Banana Sigatoka Leaf Disease': {
+                docs: [
+                    { title: 'IITA - Black Sigatoka Guide', url: 'https://www.iita.org/wp-content/uploads/2019/07/Black-Sigatoka-of-banana.pdf' },
+                    { title: 'Sigatoka Disease Handbook', url: "{% static 'img/sigatoka_handbook.pdf' %}", type: 'local' },
+                    { title: 'University of Florida Guide', url: 'https://edis.ifas.ufl.edu/publication/MG044' }
+                ]
+            },
+            'Banana Bunchy Top Disease': {
+                docs: [
+                    { title: 'Bunchy Top Identification Guide', url: "{% static 'img/bunchy_top_guide.pdf' %}", type: 'local' },
+                    { title: 'Bunchy Top Management', url: "{% static 'img/bunchy_top_management.pdf' %}", type: 'local' }
+                ]
+            },
+             'Banana Panama Leaf Disease': {
+                docs: [
+                    { title: 'Bunchy Top Identification Guide', url: "{% static 'img/bunchy_top_guide.pdf' %}", type: 'local' },
+                    { title: 'Bunchy Top Management', url: "{% static 'img/bunchy_top_management.pdf' %}", type: 'local' }
+                ]
+            },
+            // Add more diseases as needed
+            'Banana Mosaic Disease': {
+                docs: [
+                    { title: 'Mosaic Disease Overview', url: "{% static 'img/mosaic_disease.pdf' %}", type: 'local' },
+                    { title: 'Mosaic Virus Research', url: 'https://www.sciencedirect.com/science/article/pii/S0168170219303735' }
+                ]
+            }
+        };
+
+        // Language-specific messages
+        const languageMessages = {
+            en: {
+                noDocuments: 'No document resources available at the moment.',
+                noInfo: 'No information available.',
+                viewResource: 'View Resource',
+                openPdf: 'Open PDF'
+            },
+            tl: {
+                noDocuments: 'Walang available na dokumentong resources sa ngayon.',
+                noInfo: 'Walang impormasyon.',
+                viewResource: 'Tingnan ang Sanggunian',
+                openPdf: 'Buksan ang PDF'
+            }
+        };
+
+        // Load saved language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            langSelect.value = currentLanguage;
+            switchLanguage(currentLanguage);
+            
+            // Initialize search functionality
+            initializeSearch();
+        });
+
+        function updateEducationalResourcesLanguage() {
+            const modal = document.getElementById('knowledgeModal');
+            if (modal.style.display === 'block' || modal.classList.contains('show')) {
+                const currentTitle = document.getElementById('modalTitle').textContent;
+                loadEducationalResources(currentTitle);
+            }
+        }
+
+        // PDF Viewer Function
+        function openPdfViewer(pdfUrl, title) {
+            document.getElementById('pdfModalTitle').textContent = title;
+            document.getElementById('pdfViewer').src = pdfUrl;
+            const modal = new bootstrap.Modal(document.getElementById('pdfViewerModal'));
+            modal.show();
+        }
+
+        function openModal(title, img, definition, controlPrevention) {
+            // Handle empty values
+            title = title || (currentLanguage === 'en' ? 'No Title' : 'Walang Pamagat');
+            img = img || '/static/img/default-image.png';
+            definition = definition || languageMessages[currentLanguage].noInfo;
+            controlPrevention = controlPrevention || languageMessages[currentLanguage].noInfo;
+
+            // Set basic content
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalImg').src = img;
+            document.getElementById('definitionContent').innerHTML = formatContent(definition);
+            document.getElementById('controlContent').innerHTML = formatContent(controlPrevention);
+
+            // Show/hide control section
+            const controlSection = document.getElementById('controlSection');
+            controlSection.style.display = controlPrevention && controlPrevention.trim() ? 'block' : 'none';
+
+            // Load educational resources
+            loadEducationalResources(title);
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('knowledgeModal'));
+            modal.show();
+        }
+
+        function loadEducationalResources(title) {
+            const resources = educationalResources[title] || {
+                docs: []
+            };
+
+            const messages = languageMessages[currentLanguage];
+
+            // Load documents
+            const docList = document.getElementById('docList');
+            if (resources.docs.length > 0) {
+                docList.innerHTML = resources.docs.map(doc => {
+                    // Determine icon and action based on file type
+                    let iconClass = 'fas fa-external-link-alt';
+                    let action = `target="_blank" href="${doc.url}"`;
+                    
+                    if (doc.type === 'local' || doc.url.includes('.pdf')) {
+                        iconClass = 'fas fa-file-pdf';
+                        action = `onclick="openPdfViewer('${doc.url}', '${doc.title.replace(/'/g, "\\'")}')" href="#"`;
+                    }
+                    
+                    return `
+                        <li class="doc-item">
+                            <a ${action} class="doc-link">
+                                <i class="${iconClass} doc-icon"></i>
+                                <span>${doc.title}</span>
+                            </a>
+                            <a ${action} style="color: var(--primary-gold);" title="${doc.type === 'local' ? messages.openPdf : messages.viewResource}">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </li>
+                    `;
+                }).join('');
+            } else {
+                docList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>${messages.noDocuments}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function formatContent(content) {
+            if (!content) return `<p style="color: rgba(255,255,255,0.6);">${languageMessages[currentLanguage].noInfo}</p>`;
+            
+            const paragraphs = content.split('\n').filter(p => p.trim());
+            let formatted = '';
+            
+            paragraphs.forEach(paragraph => {
+                const trimmed = paragraph.trim();
+                
+                if (trimmed.startsWith('-') || trimmed.startsWith('•') || trimmed.match(/^\d+\./)) {
+                    if (!formatted.includes('<ul>') && !formatted.includes('<ol>')) {
+                        formatted += trimmed.match(/^\d+\./) ? '<ol>' : '<ul>';
+                    }
+                    const listItem = trimmed.replace(/^[-•]\s*/, '').replace(/^\d+\.\s*/, '');
+                    formatted += `<li>${listItem}</li>`;
+                } else {
+                    if (formatted.includes('<ul>') && !formatted.includes('</ul>')) {
+                        formatted += '</ul>';
+                    }
+                    if (formatted.includes('<ol>') && !formatted.includes('</ol>')) {
+                        formatted += '</ol>';
+                    }
+                    
+                    if (trimmed.length > 0) {
+                        formatted += `<p style="margin-bottom: 15px; line-height: 1.8;">${trimmed}</p>`;
+                    }
+                }
+            });
+            
+            if (formatted.includes('<ul>') && !formatted.includes('</ul>')) {
+                formatted += '</ul>';
+            }
+            if (formatted.includes('<ol>') && !formatted.includes('</ol>')) {
+                formatted += '</ol>';
+            }
+            
+            return formatted || `<p style="color: rgba(255,255,255,0.6);">${languageMessages[currentLanguage].noInfo}</p>`;
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchBox = document.getElementById('searchBox');
+            const varietySearchBox = document.getElementById('varietySearchBox');
+            
+            if (searchBox) {
+                searchBox.addEventListener('input', function() {
+                    const term = this.value.toLowerCase();
+                    const cards = document.querySelectorAll('.knowledge-card:not(.variety-card)');
+                    let visibleCount = 0;
+                    
+                    cards.forEach(card => {
+                        const title = card.querySelector('h4').innerText.toLowerCase();
+                        const isVisible = title.includes(term);
+                        card.style.display = isVisible ? 'block' : 'none';
+                        if (isVisible) visibleCount++;
+                    });
+                    
+                    // Show no results message
+                    handleNoResults(term, visibleCount, 'knowledgeContainer', 'noResultsMessage');
+                });
+            }
+            
+            if (varietySearchBox) {
+                varietySearchBox.addEventListener('input', function() {
+                    const term = this.value.toLowerCase();
+                    const cards = document.querySelectorAll('.variety-card');
+                    let visibleCount = 0;
+                    
+                    cards.forEach(card => {
+                        const title = card.querySelector('h4').innerText.toLowerCase();
+                        const isVisible = title.includes(term);
+                        card.style.display = isVisible ? 'block' : 'none';
+                        if (isVisible) visibleCount++;
+                    });
+                    
+                    // Show no results message
+                    handleNoResults(term, visibleCount, 'varietyContainer', 'varietyNoResultsMessage');
+                });
+            }
+        }
+
+        function handleNoResults(term, visibleCount, containerId, messageId) {
+            let noResultsMsg = document.getElementById(messageId);
+            
+            if (visibleCount === 0 && term) {
+                if (!noResultsMsg) {
+                    noResultsMsg = document.createElement('div');
+                    noResultsMsg.id = messageId;
+                    noResultsMsg.className = 'empty-state';
+                    noResultsMsg.innerHTML = `
+                        <i class="fas fa-search"></i>
+                        <h3>${currentLanguage === 'en' ? 'No Results Found' : 'Walang nahanap na resulta'}</h3>
+                        <p>${currentLanguage === 'en' ? 'Try searching with different keywords' : 'Subukang maghanap gamit ang ibang salita'}</p>
+                    `;
+                    document.getElementById(containerId).appendChild(noResultsMsg);
+                }
+                noResultsMsg.style.display = 'block';
+            } else if (noResultsMsg) {
+                noResultsMsg.style.display = 'none';
+            }
+        }
+
+        // Variety Modal Function
+        function openVarietyModal(title, img, description, classification, origin, harvestPeriod) {
+            // Handle empty values
+            title = title || (currentLanguage === 'en' ? 'No Title' : 'Walang Pamagat');
+            img = img || '/static/img/default-image.png';
+            description = description || languageMessages[currentLanguage].noInfo;
+            classification = classification || '';
+            origin = origin || '';
+            harvestPeriod = harvestPeriod || '';
+
+            // Set basic content
+            document.getElementById('varietyModalTitle').innerText = title;
+            document.getElementById('varietyModalImg').src = img;
+            document.getElementById('varietyDescriptionContent').innerHTML = formatContent(description);
+            
+            // Classification
+            const classificationSection = document.getElementById('varietyClassificationSection');
+            if (classification && classification.trim()) {
+                document.getElementById('varietyClassificationContent').innerHTML = `<p style="margin-bottom: 15px; line-height: 1.8;">${classification}</p>`;
+                classificationSection.style.display = 'block';
+            } else {
+                classificationSection.style.display = 'none';
+            }
+            
+            // Origin
+            const originSection = document.getElementById('varietyOriginSection');
+            if (origin && origin.trim()) {
+                document.getElementById('varietyOriginContent').innerHTML = `<p style="margin-bottom: 15px; line-height: 1.8;">${origin}</p>`;
+                originSection.style.display = 'block';
+            } else {
+                originSection.style.display = 'none';
+            }
+            
+            // Harvest Period
+            const harvestSection = document.getElementById('varietyHarvestSection');
+            if (harvestPeriod && harvestPeriod.trim()) {
+                document.getElementById('varietyHarvestContent').innerHTML = `<p style="margin-bottom: 15px; line-height: 1.8;">${harvestPeriod}</p>`;
+                harvestSection.style.display = 'block';
+            } else {
+                harvestSection.style.display = 'none';
+            }
+
+            // Load educational resources
+            loadVarietyEducationalResources(title);
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('varietyModal'));
+            modal.show();
+        }
+
+        function loadVarietyEducationalResources(title) {
+            const resources = educationalResources[title] || { docs: [] };
+            const messages = languageMessages[currentLanguage];
+
+            // Load documents
+            const docList = document.getElementById('varietyDocList');
+            if (resources.docs.length > 0) {
+                docList.innerHTML = resources.docs.map(doc => {
+                    let iconClass = 'fas fa-external-link-alt';
+                    let action = `target="_blank" href="${doc.url}"`;
+                    
+                    if (doc.type === 'local' || doc.url.includes('.pdf')) {
+                        iconClass = 'fas fa-file-pdf';
+                        action = `onclick="openPdfViewer('${doc.url}', '${doc.title.replace(/'/g, "\\'")}')" href="#"`;
+                    }
+                    
+                    return `
+                        <li class="doc-item">
+                            <a ${action} class="doc-link">
+                                <i class="${iconClass} doc-icon"></i>
+                                <span>${doc.title}</span>
+                            </a>
+                            <a ${action} style="color: var(--primary-gold);" title="${doc.type === 'local' ? messages.openPdf : messages.viewResource}">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </li>
+                    `;
+                }).join('');
+            } else {
+                docList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>${messages.noDocuments}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.knowledge-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+    </script>
+{% endblock %}

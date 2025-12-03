@@ -1,0 +1,642 @@
+{% extends 'a_scan_nav.html' %}
+{% load static %}
+
+{% block title %}BANAeScan -Farmer Scan's Variety History{% endblock %}
+
+{% block navbar_title %}Scan Variety History{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary-gold: #FFB911;
+            --dark-green: #0F3D2E;
+            --medium-green: #1B5E47;
+            --light-green: #4CAF50;
+            --accent-orange: #FF8C42;
+            --bg-dark: #0A1F1A;
+            --bg-card: rgb(12, 75, 12);
+            --text-light: #FFFFFF;
+            --text-gold: #ffc821;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background-image: url("{% static 'img/6.png' %}");
+            background-attachment: fixed;
+            background-size: cover;
+            color: var(--text-light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 185, 17, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: backgroundMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes backgroundMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .search-input {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 3px solid rgba(255, 184, 17, 0.594);
+            background: rgba(255, 255, 255, 0.578);
+            color: black;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+
+        .search-input::placeholder {
+            color: rgb(19, 1, 1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            background: rgba(236, 234, 234);
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-orange));
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 185, 17, 0.4);
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #FF6B6B, #C92A2A);
+            color: white;
+            border: none;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #C92A2A, #FF6B6B);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 42, 42, 0.4);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 2000px;
+            margin: 30px auto;
+            padding: 0 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero-section {
+          color: #000;
+            text-align: center;
+            margin-bottom: 35px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-gold), #000000, var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: black;
+            font-weight: 300;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        #language-switcher {
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary-gold);
+            background: var(--bg-card);
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #language-switcher:hover {
+            background: rgba(255, 185, 17, 0.1);
+            border-color: var(--accent-orange);
+        }
+
+
+        /* Card Container */
+        .card-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(255, 185, 17, 0.2);
+            animation: fadeInUp 0.8s ease;
+            position: relative;
+        }
+
+        .card-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--accent-orange), var(--light-green));
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card-body {
+            padding: 35px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--text-gold);
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Table Styles */
+        .table-container {
+            max-height: 850px;
+            overflow-y: auto;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--primary-gold);
+            border-radius: 10px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-orange);
+        }
+
+        .history-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .history-table thead th {
+            position: sticky;
+            top: 0;
+            background: white;
+            color: black;
+            padding: 18px 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            z-index: 10;
+            text-align: left;
+        }
+
+        .history-table thead th:first-child {
+            border-top-left-radius: 15px;
+        }
+
+        .history-table thead th:last-child {
+            border-top-right-radius: 15px;
+        }
+
+        .history-table tbody tr {
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .history-table tbody tr:hover {
+            background: rgba(255, 185, 17, 0.1);
+            transform: scale(1.01);
+        }
+
+        .history-table tbody td {
+            padding: 15px;
+            font-size:1.5rem;
+            color: var(--text-light);
+            border-bottom: 1px solid rgba(255, 185, 17, 0.1);
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-image {
+            max-width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid var(--primary-gold);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--light-green), #28a745);
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .confidence-high {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+
+        .confidence-medium {
+            background: rgba(255, 185, 17, 0.2);
+            color: var(--primary-gold);
+            border: 1px solid var(--primary-gold);
+        }
+
+        .confidence-low {
+            background: rgba(255, 107, 107, 0.2);
+            color: #FF6B6B;
+            border: 1px solid #FF6B6B;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--primary-gold);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991px) {
+            .main-container {
+                max-width: 95%;
+            }
+
+            .hero-title {
+                font-size: 2.3rem;
+            }
+
+            .table-container {
+                max-height: 550px;
+            }
+        }
+
+        @media (max-width: 767px) {
+
+            .search-container {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .search-input {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .card-body {
+                padding: 25px 20px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .table-container {
+                max-height: 450px;
+            }
+
+            /* Make table scrollable horizontally on mobile */
+            .history-table {
+                min-width: 700px;
+            }
+
+            .history-table thead th {
+                font-size: 0.85rem;
+                padding: 12px 10px;
+            }
+
+            .history-table tbody td {
+                font-size: 0.85rem;
+                padding: 12px 10px;
+            }
+
+            .table-image {
+                max-width: 60px;
+                height: 60px;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .main-container {
+                margin: 25px auto;
+                padding: 0 15px;
+            }
+
+            .hero-title {
+                font-size: 1.8rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .card-body {
+                padding: 20px 15px;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .table-container {
+                max-height: 400px;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- Main Content -->
+     <div class="language-selector">
+    <select id="language-switcher" onchange="switchLanguage(this.value)">
+        <option value="en">English (EN)</option>
+        <option value="tl">Tagalog (TL)</option>
+    </select>
+</div>
+    <div class="main-container">
+       <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search history...">
+                <button class="search-btn" onclick="searchTable()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">SCAN HISTORY</h1>
+            <p class="hero-subtitle" data-en="View all your previous banana variety Identification" data-tl="Tingnan ang lahat ng iyong nakaraang pagkilala sa iba't ibang uri ng saging"></p>
+        </div>
+        </div>
+
+        <!-- Card Container -->
+        <div class="card-container">
+            <div class="card-body">
+                <h2 class="section-title">
+                      <p data-en=" Variety  Identification Records" data-tl=" Mga Talaan ng Pagkilala sa Iba't Ibang Uri"></p>
+                </h2>
+
+                <div class="table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                               <th data-en="Date" data-tl="Petsa"></th>
+                                <th data-en="Prediction" data-tl="Hula"></th>
+                                <th data-en="Confidence" data-tl="Kumpiyansa"></th>
+                                <th data-en="Model"></th>
+                                <th data-en="Image" data-tl="Larawan"></th>
+                                <th  data-en="Actions" data-tl="Mga Gawa"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            {% for variety_user_record in variety_user_records %}
+                            <tr>
+                                <td>{{ variety_user_record.timestamp|date:"Y-m-d H:i" }}</td>
+                                <td><strong>{{ variety_user_record.prediction }}</strong></td>
+                                <td>
+                                    {% if variety_user_record.confidence >= 80 %}
+                                        <span class="confidence-badge confidence-high">{{ variety_user_record.confidence|floatformat:2 }}%</span>
+                                    {% elif variety_user_record.confidence >= 60 %}
+                                        <span class="confidence-badge confidence-medium">{{ variety_user_record.confidence|floatformat:2 }}%</span>
+                                    {% else %}
+                                        <span class="confidence-badge confidence-low">{{ variety_user_record.confidence|floatformat:2 }}%</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ variety_user_record.model_type }}</td>
+                                <td>
+                                    {% if variety_user_record.image_url %}
+                                        <img src="{{ variety_user_record.image_url }}" class="table-image" alt="Scan result">
+                                    {% else %}
+                                        <span style="color: rgba(255, 255, 255, 0.5);">No image</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'view_scan_result' variety_user_record.id %}" class="view-btn">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open"></i>
+                                        <h3>No Scan Records Found</h3>
+                                        <p>Start scanning banana leaves to see your history here</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        function searchTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const tbody = document.getElementById('historyTableBody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cell = cells[j];
+                    if (cell) {
+                        const textValue = cell.textContent || cell.innerText;
+                        if (textValue.toLowerCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (found) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchTable();
+            }
+        });
+
+        // Real-time search
+        document.getElementById('searchInput').addEventListener('input', searchTable);
+
+        
+        // LANGUAGE SWITCHER
+        const langSelect = document.getElementById("language-switcher");
+
+        function switchLanguage(lang) {
+            const elements = document.querySelectorAll('[data-en]');
+            elements.forEach(el => {
+                if (el.getAttribute(`data-${lang}`)) {
+                    el.textContent = el.getAttribute(`data-${lang}`);
+                }
+            });
+            localStorage.setItem('selectedLanguage', lang);
+        }
+
+        // Load saved language on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+            langSelect.value = savedLang;
+            switchLanguage(savedLang);
+        });
+    </script>
+    {% endblock %}

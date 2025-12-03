@@ -1,0 +1,1833 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+    
+    <!-- Load these ONCE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        nav.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(251, 210, 66, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bright-gold);
+        }
+
+        nav .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            margin-top: 20px;
+        }
+
+        nav .menu a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+       nav .menu a:hover {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a i {
+            width: 24px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        /* Navbar Styles */
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .welcome-text {
+            font-weight: 600;
+            font-size: 25px;
+            color: var(--medium-brown);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .welcome-text span {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        #datetime {
+            font-weight: 500;
+            font-size: 20px;
+            color: var(--light-brown);
+            flex: 1;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+            font-size: 25px;
+        }
+
+        .message-icon,
+        .notification-icon,
+        .profile-icon,
+        .logout-icon {
+            cursor: pointer;
+            position: relative;
+            color: var(--medium-brown);
+            transition: all 0.2s ease;
+        }
+
+        .message-icon:hover,
+        .notification-icon:hover,
+        .profile-icon:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        .right_side_process{
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Cards Container */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 25px;
+        }
+
+        .card {
+            border-radius: 12px;
+            text-align: center;
+            padding: 25px 20px;
+            background-color: var(--white);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 25px;
+            color: var(--medium-brown);
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--light-brown);
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--medium-brown);
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            color: var(--white);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(218, 148, 8, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(218, 148, 8, 0.4);
+            color: var(--white);
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stats-content h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--white);
+        }
+
+        .stats-content p {
+            font-size: 18px;
+            margin: 5px 0;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .stats-content small {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .metric-content h4 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark-brown);
+        }
+
+        .metric-content p {
+            font-size: 14px;
+            margin: 5px 0 0 0;
+            color: var(--medium-brown);
+            font-weight: 500;
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .chart-header {
+            padding: 20px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            color: var(--white);
+        }
+
+        .chart-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .chart-body {
+            padding: 20px;
+            height: 350px;
+            position: relative;
+        }
+
+        /* Settings dropdown */
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 220px;
+            overflow: hidden;
+        }
+
+        .settings-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--medium-brown);
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(218, 148, 8, 0.1);
+        }
+
+        .settings-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .settings-dropdown a:hover {
+            background-color: rgba(218, 148, 8, 0.1);
+            padding-left: 25px;
+            color: var(--gold);
+        }
+
+        .settings-dropdown a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .settings-icon {
+            position: relative;
+        }
+
+        .settings-icon:hover .settings-dropdown {
+            display: block;
+        }
+
+        /* Charts Section */
+        .graphs-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            padding: 0 25px 25px;
+        }
+
+        .chart-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        /* Message Dropdown */
+        #messageDropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            width: 350px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-header {
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            background-color: rgba(218, 148, 8, 0.1);
+            border-bottom: 1px solid rgba(218, 148, 8, 0.2);
+        }
+
+        .dropdown-content {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(218, 148, 8, 0.1);
+            display: flex;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--medium-brown);
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(218, 148, 8, 0.05);
+        }
+
+        .unread-message {
+            background-color: rgba(251, 210, 66, 0.1);
+            border-left: 3px solid var(--gold);
+        }
+
+        .new-label {
+            background-color: var(--gold);
+            color: var(--white);
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .dropdown-footer {
+            padding: 12px;
+            text-align: center;
+            background-color: rgba(218, 148, 8, 0.1);
+        }
+
+        /* Notification Styles */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--gold);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            width: 350px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* No Data Message */
+        .no-data-message {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: var(--medium-brown);
+            text-align: center;
+            font-size: 16px;
+            padding: 20px;
+        }
+        
+        .no-data-message i {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        /* Chart specific styles */
+        .chart-container canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        /* Filter buttons */
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .filter-buttons .btn {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+        
+        .filter-buttons .btn.active {
+            background-color: var(--gold);
+            color: white;
+            border-color: var(--gold);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            nav.sidebar {
+                width: 250px;
+            }
+            .content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .card-container {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            
+            .graphs-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav.sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+            }
+            nav.sidebar.active {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+            }
+            .burger {
+                display: block;
+            }
+            .nav-bar {
+                padding-top: 60px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .welcome-text, #datetime, .search-container {
+                min-width: 100%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <div class="burger" id="burger">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'admin_dashboard' %}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'product_list' %}"><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'a_market_place' %}"><i class="fas fa-store"></i> Market Place</a>
+            <a href="{% url 'validation_list' %}"><i class="fas fa-briefcase"></i> Store Applicants</a>
+            <a href="{% url 'orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'customer_table' %}"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="{% url 'a_scan' %}"><i class="fas fa-qrcode"></i> Scan</a>
+            <a href="{% url 'a_scan' %}#knowledge-section"><i class="fas fa-book-reader"></i> Library</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <div class="nav-bar">
+            <div class="welcome-text">Welcome <span>Admin</span></div>
+            <p id="datetime"></p>
+            <div class="right_side_process">
+                <div class="icons">
+                    <!-- <div class="message-icon" id="message-icon">
+                        <i class="fas fa-comments"></i>
+                        <span id="unread-count" class="badge">0</span>
+                    </div> -->
+                    
+                    <!-- <div class="notification-icon" id="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_count > 0 %}
+                        <span class="notification-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </div> -->
+                    
+                    <div class="settings-icon" id="settings-icon">
+                        <i class="fas fa-cog"></i>
+                        <div class="settings-dropdown">
+                            <a href="{% url 'a_setting' %}" class="settings-item"><i class="fas fa-user"></i>Setting Detail</a>
+                            <div class="dropdown-footer">
+                                <a href="{% url 'logout' %}" class="settings-item" style="color: #EF4444;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h1>MY STORE DATA</h1>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <!-- Total Customers -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--medium-brown), var(--light-brown));">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_customers|default:0 }}</h3>
+                        <p>Total Customers</p>
+                        <small>{{ new_customers_month|default:0 }} new this month</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Sales Revenue -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--light-brown), var(--gold));">
+                    <div class="stats-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>₱{{ total_sales|default:0|floatformat:2 }}</h3>
+                        <p>Total Revenue</p>
+                        <small>All time sales</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Sales -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--gold), var(--bright-gold));">
+                    <div class="stats-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>₱{{ today_sales|default:0|floatformat:2 }}</h3>
+                        <p>Today's Sales</p>
+                        <small>
+                            {% if weekly_sales_data and weekly_sales_data|length > 0 %}
+                                {% with last_day=weekly_sales_data|last %}
+                                    {{ last_day.order_count|default:0 }} orders today
+                                {% endwith %}
+                            {% else %}
+                                0 orders today
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Stocks -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--dark-brown), var(--medium-brown));">
+                    <div class="stats-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_stocks|default:0 }}</h3>
+                        <p>Total Stock</p>
+                        <small>{{ low_stock_products|default:0 }} low stock items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="row mb-4">
+            <!-- Weekly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--gold);">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ weekly_sales|default:0|floatformat:2 }}</h4>
+                        <p>This Week</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monthly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--light-brown);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ monthly_sales|default:0|floatformat:2 }}</h4>
+                        <p>This Month</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Yearly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--medium-brown);">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ yearly_sales|default:0|floatformat:2 }}</h4>
+                        <p>This Year</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--bright-gold);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ total_orders|default:0 }}</h4>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completed Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--gold);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ completed_orders|default:0 }}</h4>
+                        <p>Completed</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--light-brown);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ pending_orders|default:0 }}</h4>
+                        <p>Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Performance and Order Graph -->
+        <div class="row mb-4">
+            <!-- Sales Chart -->
+            <div class="col-md-8 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line me-2"></i>Weekly Sales Performance</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div id="salesChart-no-data" class="no-data-message">
+                            <i class="fas fa-chart-line"></i>
+                            <p>No sales data available</p>
+                        </div>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+                    
+            <!-- Order Status Chart -->
+            <div class="col-md-4 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-pie me-2"></i>Order Status Distribution</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div id="orderStatusChart-no-data" class="no-data-message">
+                            <i class="fas fa-chart-pie"></i>
+                            <p>No order data available</p>
+                        </div>
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-star me-2"></i>Top Selling Products</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="topProductsTable">
+                                <thead>
+                                    <tr style="background: var(--light-bg);">
+                                        <th>Product Name</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Total Sold</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if top_products %}
+                                        {% for product in top_products %}
+                                        <tr class="product-row" 
+                                            data-product-id="{{ product.id }}"
+                                            data-name="{{ product.name }}"
+                                            data-price="{{ product.price }}"
+                                            data-stock="{{ product.stock }}"
+                                            data-sold="{% if product.total_sold %}{{ product.total_sold }}{% else %}0{% endif %}"
+                                            data-revenue="{% if product.total_revenue %}{{ product.total_revenue }}{% else %}0{% endif %}"
+                                            data-image="{% if product.image_url %}{{ product.image_url.url }}{% else %}/static/img/default-product.png{% endif %}"
+                                            data-description="{% if product.description %}{{ product.description }}{% else %}No description available{% endif %}">
+                                            <td>{{ product.name }}</td>
+                                            <td>₱{{ product.price|floatformat:2 }}</td>
+                                            <td>
+                                                <span class="badge {% if product.stock < 10 %}bg-warning{% else %}bg-success{% endif %}">
+                                                    {{ product.stock }}
+                                                </span>
+                                            </td>
+                                            <td>{% if product.total_sold %}{{ product.total_sold }}{% else %}0{% endif %}</td>
+                                            <td>₱{% if product.total_revenue %}{{ product.total_revenue|floatformat:2 }}{% else %}0.00{% endif %}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No products found</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mt-5">MY PURCHASES FROM OTHER STORES</h1>
+
+        <div class="row mb-4">
+            <!-- Purchase Summary Cards -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
+                    <div class="stats-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_purchase_count|default:0 }}</h3>
+                        <p>Total Purchases</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #2196F3, #0D47A1);">
+                    <div class="stats-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>₱{{ total_purchase_amount|default:0|floatformat:2 }}</h3>
+                        <p>Total Spent</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #FF9800, #EF6C00);">
+                    <div class="stats-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ unique_stores_count|default:0 }}</h3>
+                        <p>Stores Shopped</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #9C27B0, #6A1B9A);">
+                    <div class="stats-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ unique_products_count|default:0 }}</h3>
+                        <p>Unique Products</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase History -->
+        <div class="row mb-4">
+            <div class="col-md-8 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-history me-2"></i>Recent Purchases</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Store</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if my_purchases %}
+                                        {% for purchase in my_purchases %}
+                                        <tr class="purchase-row"
+                                            data-product="{{ purchase.product.name }}"
+                                            data-store="{{ purchase.store.name }}"
+                                            data-price="{{ purchase.product.price }}"
+                                            data-quantity="{{ purchase.quantity }}"
+                                            data-total="{{ purchase.total_amount }}"
+                                            data-date="{{ purchase.order_date|date:'M d, Y' }}"
+                                            data-image="{% if purchase.product.image_url %}{{ purchase.product.image_url.url }}{% else %}/static/img/default-product.png{% endif %}">
+                                            <td>{{ purchase.order_date|date:"M d, Y" }}</td>
+                                            <td>{{ purchase.store.name }}</td>
+                                            <td>{{ purchase.product.name }}</td>
+                                            <td>{{ purchase.quantity }}</td>
+                                            <td>₱{{ purchase.total_amount|floatformat:2 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No purchases yet</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monthly Purchase Chart -->
+            <div class="col-md-4 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-bar me-2"></i>Monthly Purchase Trend</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div id="monthlyPurchaseChart-no-data" class="no-data-message">
+                            <i class="fas fa-chart-bar"></i>
+                            <p>No purchase data available</p>
+                        </div>
+                        <canvas id="monthlyPurchaseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mt-5">USER DATA VISUALIZATION</h1>
+        
+        <div class="row mb-4">
+            <!-- User Role Distribution -->
+            <div class="col-md-4 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-users me-2"></i>User Role Distribution</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div id="userRoleChart-no-data" class="no-data-message">
+                            <i class="fas fa-users"></i>
+                            <p>No user data available</p>
+                        </div>
+                        <canvas id="userRoleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Registration Over Time -->
+            <div class="col-md-8 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line me-2"></i>User Registration Timeline</h4>
+                        <div class="filter-buttons">
+                            <button class="btn btn-sm btn-outline-secondary filter-btn active" data-filter="day">Daily</button>
+                            <button class="btn btn-sm btn-outline-secondary filter-btn" data-filter="month">Monthly</button>
+                            <button class="btn btn-sm btn-outline-secondary filter-btn" data-filter="year">Yearly</button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <div id="userRegistrationChart-no-data" class="no-data-message">
+                            <i class="fas fa-chart-line"></i>
+                            <p>No registration data available</p>
+                        </div>
+                        <canvas id="userRegistrationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mt-5">FARMER'S DATA VISUALIZATION</h1>
+
+        <div class="row mb-4">
+            <!-- Farmer Summary Cards -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_farmers|default:0 }}</h3>
+                        <p>Total Farmers</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #2196F3, #0D47A1);">
+                    <div class="stats-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ active_farmers|default:0 }}</h3>
+                        <p>Active Farmers</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #FF9800, #EF6C00);">
+                    <div class="stats-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_detections|default:0 }}</h3>
+                        <p>Total Scans</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #9C27B0, #6A1B9A);">
+                    <div class="stats-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ detection_summary.disease_ratio|default:0 }}%</h3>
+                        <p>Disease Scans</p>
+                        <small>{{ detection_summary.variety_ratio|default:0 }}% Variety Scans</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- Detection Activity Chart -->
+            <div class="col-md-8 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line me-2"></i>Daily Detection Activity</h4>
+                        <div class="filter-buttons">
+                            <button class="btn btn-sm btn-outline-secondary detection-filter-btn active" data-filter="7">7 Days</button>
+                            <button class="btn btn-sm btn-outline-secondary detection-filter-btn" data-filter="30">30 Days</button>
+                            <button class="btn btn-sm btn-outline-secondary detection-filter-btn" data-filter="90">90 Days</button>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <div id="detectionActivityChart-no-data" class="no-data-message">
+                            <i class="fas fa-chart-line"></i>
+                            <p>No detection data available</p>
+                        </div>
+                        <canvas id="detectionActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Farmers Table -->
+            <div class="col-md-4 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-trophy me-2"></i>Top Active Farmers</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Farmer</th>
+                                        <th>Scans</th>
+                                        <th>Last Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if top_farmers %}
+                                        {% for farmer in top_farmers %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ farmer.first_name }} {{ farmer.last_name }}</strong><br>
+                                                <small class="text-muted">{{ farmer.username }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ farmer.total_scans|default:0 }}</span><br>
+                                                <small class="text-muted">
+                                                    D: {{ farmer.disease_scans|default:0 }} | V: {{ farmer.variety_scans|default:0 }}
+                                                </small>
+                                            </td>
+                                            <td>{{ farmer.last_scan|default:"Never" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No farmer data available</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Modal -->
+        <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Product Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img id="modal-product-image" src="" alt="Product Image" class="img-fluid rounded">
+                            </div>
+                            <div class="col-md-8">
+                                <h4 id="modal-product-name"></h4>
+                                <p id="modal-product-description" class="text-muted"></p>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p><strong>Price:</strong> <span id="modal-product-price"></span></p>
+                                        <p><strong>Stock:</strong> <span id="modal-product-stock"></span></p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>Total Sold:</strong> <span id="modal-product-sold"></span></p>
+                                        <p><strong>Revenue:</strong> <span id="modal-product-revenue"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Details Modal -->
+        <div class="modal fade" id="purchaseDetailsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Purchase Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <img id="modal-purchase-image" src="" alt="Product Image" class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+                        <h5 id="modal-purchase-product" class="text-center"></h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <p><strong>Store:</strong> <span id="modal-purchase-store"></span></p>
+                                <p><strong>Price per unit:</strong> <span id="modal-purchase-price"></span></p>
+                            </div>
+                            <div class="col-6">
+                                <p><strong>Quantity:</strong> <span id="modal-purchase-quantity"></span></p>
+                                <p><strong>Total Amount:</strong> <span id="modal-purchase-total"></span></p>
+                            </div>
+                        </div>
+                        <p><strong>Purchase Date:</strong> <span id="modal-purchase-date"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data for JavaScript -->
+    {% if weekly_sales_json %}
+    {{ weekly_sales_json|json_script:"weekly-sales-data" }}
+    {% endif %}
+    
+    {% if order_status_json %}
+    {{ order_status_json|json_script:"order-status-data" }}
+    {% endif %}
+    
+    {% if monthly_purchases_json %}
+    {{ monthly_purchases_json|json_script:"monthly_purchases_json" }}
+    {% endif %}
+    
+    {% if role_distribution_json %}
+    {{ role_distribution_json|json_script:"role_distribution_json" }}
+    {% endif %}
+    
+    {% if daily_registrations_json %}
+    {{ daily_registrations_json|json_script:"daily_registrations_json" }}
+    {% endif %}
+    
+    {% if daily_detection_activity_json %}
+    {{ daily_detection_activity_json|json_script:"daily_detection_activity_json" }}
+    {% endif %}
+
+    <!-- Main JavaScript -->
+    <script>
+        console.log("=== Admin Dashboard Initialization ===");
+        
+        // Global chart instances
+        let salesChart, orderStatusChart, monthlyPurchaseChart, userRoleChart, userRegistrationChart, detectionActivityChart;
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded");
+            
+            // Initialize charts
+            initializeAllCharts();
+            
+            // Initialize other functionality
+            initializeSidebar();
+            initializeDateTime();
+            initializeHoverEffects();
+            initializeFilterButtons();
+            initializeDropdowns();
+        });
+        
+        function initializeAllCharts() {
+            console.log("Initializing all charts...");
+            
+            // Initialize each chart with error handling
+            try {
+                initializeStoreCharts();
+                console.log("✓ Store charts initialized");
+            } catch (error) {
+                console.error("Error initializing store charts:", error);
+                showNoDataMessage('salesChart', 'Error loading sales data');
+                showNoDataMessage('orderStatusChart', 'Error loading order data');
+            }
+            
+            try {
+                initializePurchaseCharts();
+                console.log("✓ Purchase charts initialized");
+            } catch (error) {
+                console.error("Error initializing purchase charts:", error);
+                showNoDataMessage('monthlyPurchaseChart', 'Error loading purchase data');
+            }
+            
+            try {
+                initializeUserCharts();
+                console.log("✓ User charts initialized");
+            } catch (error) {
+                console.error("Error initializing user charts:", error);
+                showNoDataMessage('userRoleChart', 'Error loading user data');
+                showNoDataMessage('userRegistrationChart', 'Error loading registration data');
+            }
+            
+            try {
+                initializeFarmerCharts();
+                console.log("✓ Farmer charts initialized");
+            } catch (error) {
+                console.error("Error initializing farmer charts:", error);
+                showNoDataMessage('detectionActivityChart', 'Error loading detection data');
+            }
+            
+            console.log("All charts initialization complete");
+        }
+        
+        // ========== STORE CHARTS ==========
+        function initializeStoreCharts() {
+            // 1. Weekly Sales Chart
+            const weeklySalesData = getJsonData('weekly-sales-data');
+            console.log("Weekly Sales Data:", weeklySalesData);
+            if (weeklySalesData && weeklySalesData.length > 0) {
+                const salesCtx = document.getElementById('salesChart').getContext('2d');
+                salesChart = new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: weeklySalesData.map((item, index) => item[index].day || 'Day'),
+                        datasets: [{
+                            label: 'Daily Sales (₱)',
+                            data: weeklySalesData.map(item => item.total_sales || 0),
+                            borderColor: '#DA9408',
+                            backgroundColor: 'rgba(218, 148, 8, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#DA9408',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: getChartOptions({
+                        yLabel: 'Sales (₱)',
+                        yCallback: value => '₱' + value.toLocaleString()
+                    })
+                });
+            } else {
+                showNoDataMessage('salesChart', 'No sales data available');
+            }
+            
+            // 2. Order Status Chart
+            const orderStatusData = getJsonData('order-status-data');
+            if (orderStatusData && orderStatusData.length > 0) {
+                const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+                const statusColors = {
+                    'Pending': '#FFA726',
+                    'On Process': '#42A5F5',
+                    'Delivered': '#66BB6A',
+                    'Completed': '#26A69A',
+                    'Cancelled': '#EF5350'
+                };
+                
+                orderStatusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: orderStatusData.map(item => item.status),
+                        datasets: [{
+                            data: orderStatusData.map(item => item.count || 0),
+                            backgroundColor: orderStatusData.map(item => statusColors[item.status] || '#9E9E9E'),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } else {
+                showNoDataMessage('orderStatusChart', 'No order data available');
+            }
+        }
+        
+        // ========== PURCHASE CHARTS ==========
+        function initializePurchaseCharts() {
+            const monthlyPurchases = getJsonData('monthly_purchases_json');
+            if (monthlyPurchases && monthlyPurchases.length > 0) {
+                const purchaseCtx = document.getElementById('monthlyPurchaseChart').getContext('2d');
+                monthlyPurchaseChart = new Chart(purchaseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthlyPurchases.map(item => item.month_label || item.month || 'Month'),
+                        datasets: [{
+                            label: 'Amount Spent (₱)',
+                            data: monthlyPurchases.map(item => item.total_amount || 0),
+                            backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                            borderColor: 'rgba(33, 150, 243, 1)',
+                            borderWidth: 2,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: getChartOptions({
+                        yLabel: 'Amount (₱)',
+                        yCallback: value => '₱' + value.toLocaleString()
+                    })
+                });
+            } else {
+                showNoDataMessage('monthlyPurchaseChart', 'No purchase data available');
+            }
+        }
+        
+        // ========== USER CHARTS ==========
+        function initializeUserCharts() {
+            // 1. User Role Distribution
+            const roleData = getJsonData('role_distribution_json');
+            if (roleData && roleData.length > 0) {
+                const roleCtx = document.getElementById('userRoleChart').getContext('2d');
+                const roleColors = {
+                    'Farmer': '#4CAF50',
+                    'Market-entity': '#2196F3',
+                    'Customer': '#FF9800'
+                };
+                
+                userRoleChart = new Chart(roleCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: roleData.map(item => item.role),
+                        datasets: [{
+                            data: roleData.map(item => item.count || 0),
+                            backgroundColor: roleData.map(item => roleColors[item.role] || '#9E9E9E'),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } else {
+                showNoDataMessage('userRoleChart', 'No user data available');
+            }
+            
+            // 2. User Registration Timeline
+            const dailyRegistrations = getJsonData('daily_registrations_json');
+            if (dailyRegistrations && dailyRegistrations.length > 0) {
+                const regCtx = document.getElementById('userRegistrationChart').getContext('2d');
+                userRegistrationChart = new Chart(regCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyRegistrations.map(item => item.date_label || item.date || 'Date'),
+                        datasets: [{
+                            label: 'Total Registrations',
+                            data: dailyRegistrations.map(item => item.count || 0),
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: getChartOptions({
+                        yLabel: 'Number of Users',
+                        yCallback: value => Math.round(value)
+                    })
+                });
+            } else {
+                showNoDataMessage('userRegistrationChart', 'No registration data available');
+            }
+        }
+        
+        // ========== FARMER CHARTS ==========
+        function initializeFarmerCharts() {
+            const detectionActivity = getJsonData('daily_detection_activity_json');
+            if (detectionActivity && detectionActivity.length > 0) {
+                const detectionCtx = document.getElementById('detectionActivityChart').getContext('2d');
+                detectionActivityChart = new Chart(detectionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: detectionActivity.map(item => item.day || 'Day'),
+                        datasets: [{
+                            label: 'Total Scans',
+                            data: detectionActivity.map(item => item.total_scans || 0),
+                            borderColor: '#EF5350',
+                            backgroundColor: 'rgba(239, 83, 80, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: getChartOptions({
+                        yLabel: 'Number of Scans',
+                        yCallback: value => Math.round(value)
+                    })
+                });
+            } else {
+                showNoDataMessage('detectionActivityChart', 'No detection data available');
+            }
+        }
+        
+        // ========== HELPER FUNCTIONS ==========
+        function getJsonData(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.log(`Element ${elementId} not found`);
+                return null;
+            }
+            
+            try {
+                const data = JSON.parse(element.textContent);
+                console.log(`Loaded ${elementId}:`, data);
+                return data;
+            } catch (error) {
+                console.log(`Error parsing ${elementId}:`, error);
+                return null;
+            }
+        }
+        
+        function getChartOptions(customOptions = {}) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: customOptions.yLabel || 'Value'
+                        },
+                        ticks: {
+                            callback: customOptions.yCallback || (value => value)
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            };
+        }
+        
+        function showNoDataMessage(canvasId, message) {
+            const noDataDiv = document.getElementById(`${canvasId}-no-data`);
+            const canvas = document.getElementById(canvasId);
+            
+            if (noDataDiv) {
+                noDataDiv.style.display = 'flex';
+                noDataDiv.querySelector('p').textContent = message;
+            }
+            
+            if (canvas) {
+                canvas.style.display = 'none';
+            }
+        }
+        
+        function initializeSidebar() {
+            const burger = document.getElementById('burger');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (burger && sidebar) {
+                burger.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    burger.classList.toggle('active');
+                });
+            }
+        }
+        
+        function initializeDateTime() {
+            function updateDateTime() {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                const formatted = now.toLocaleDateString('en-US', options);
+                const datetimeElement = document.getElementById('datetime');
+                if (datetimeElement) {
+                    datetimeElement.textContent = formatted;
+                }
+            }
+            
+            // Update immediately and every minute
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
+        }
+        
+        function initializeHoverEffects() {
+            // Product rows hover
+            const productRows = document.querySelectorAll('.product-row');
+            productRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(218, 148, 8, 0.1)';
+                    this.style.cursor = 'pointer';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+                
+                row.addEventListener('click', function() {
+                    const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+                    
+                    document.getElementById('modal-product-name').textContent = this.dataset.name || '';
+                    document.getElementById('modal-product-description').textContent = this.dataset.description || 'No description';
+                    document.getElementById('modal-product-price').textContent = '₱' + (parseFloat(this.dataset.price) || 0).toFixed(2);
+                    document.getElementById('modal-product-stock').textContent = this.dataset.stock || '0';
+                    document.getElementById('modal-product-sold').textContent = this.dataset.sold || '0';
+                    document.getElementById('modal-product-revenue').textContent = '₱' + (parseFloat(this.dataset.revenue) || 0).toFixed(2);
+                    document.getElementById('modal-product-image').src = this.dataset.image || '/static/img/default-product.png';
+                    
+                    modal.show();
+                });
+            });
+            
+            // Purchase rows hover
+            const purchaseRows = document.querySelectorAll('.purchase-row');
+            purchaseRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                    this.style.cursor = 'pointer';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+                
+                row.addEventListener('click', function() {
+                    const modal = new bootstrap.Modal(document.getElementById('purchaseDetailsModal'));
+                    
+                    document.getElementById('modal-purchase-product').textContent = this.dataset.product || '';
+                    document.getElementById('modal-purchase-store').textContent = this.dataset.store || '';
+                    document.getElementById('modal-purchase-price').textContent = '₱' + (parseFloat(this.dataset.price) || 0).toFixed(2);
+                    document.getElementById('modal-purchase-quantity').textContent = this.dataset.quantity || '0';
+                    document.getElementById('modal-purchase-total').textContent = '₱' + (parseFloat(this.dataset.total) || 0).toFixed(2);
+                    document.getElementById('modal-purchase-date').textContent = this.dataset.date || '';
+                    document.getElementById('modal-purchase-image').src = this.dataset.image || '/static/img/default-product.png';
+                    
+                    modal.show();
+                });
+            });
+        }
+        
+        function initializeFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn, .detection-filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from siblings
+                    const parent = this.parentElement;
+                    parent.querySelectorAll('.btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Handle filter logic based on data-filter attribute
+                    const filterValue = this.getAttribute('data-filter');
+                    console.log(`Filter clicked: ${filterValue}`);
+                });
+            });
+        }
+        
+        function initializeDropdowns() {
+            // Settings dropdown
+            const settingsIcon = document.getElementById('settings-icon');
+            const settingsDropdown = settingsIcon?.querySelector('.settings-dropdown');
+            
+            if (settingsIcon && settingsDropdown) {
+                settingsIcon.addEventListener('mouseenter', function() {
+                    settingsDropdown.style.display = 'block';
+                });
+                
+                settingsIcon.addEventListener('mouseleave', function() {
+                    settingsDropdown.style.display = 'none';
+                });
+            }
+            
+            // Message dropdown
+            const messageIcon = document.getElementById('message-icon');
+            if (messageIcon) {
+                messageIcon.addEventListener('click', function() {
+                    // Toggle message dropdown logic here
+                    console.log('Message icon clicked');
+                });
+            }
+            
+            // Notification dropdown
+            const notificationIcon = document.getElementById('notification-icon');
+            if (notificationIcon) {
+                notificationIcon.addEventListener('click', function() {
+                    // Toggle notification dropdown logic here
+                    console.log('Notification icon clicked');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

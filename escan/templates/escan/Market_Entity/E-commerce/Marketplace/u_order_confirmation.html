@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --success-green: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: none;
+        }
+
+        .card-header {
+            background-color: var(--success-green);
+            color: var(--white);
+            padding: 25px;
+            font-size: 1.5rem;
+            font-weight: 300;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .text-success {
+            color: var(--success-green);
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--medium-brown);
+        }
+
+        .card-text {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .order-details, .shipping-details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .order-details h4, .shipping-details h4 {
+            color: var(--medium-brown);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .order-details p, .shipping-details p {
+            margin: 8px 0;
+            font-size: 1rem;
+        }
+
+        .order-details strong, .shipping-details strong {
+            color: var(--dark-brown);
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: var(--light-brown);
+        }
+
+        @media (max-width: 768px) {
+            .card-header {
+                padding: 20px;
+                font-size: 1.5rem;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .text-success {
+                font-size: 4rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+            
+            .card-text {
+                font-size: 1.1rem;
+            }
+            
+            .order-details, .shipping-details {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-header {
+                font-size: 1.3rem;
+                padding: 15px;
+            }
+            
+            .text-success {
+                font-size: 3rem;
+            }
+            
+            .card-title {
+                font-size: 1.3rem;
+            }
+            
+            .order-details p, .shipping-details p {
+                font-size: 0.9rem;
+            }
+            
+            .order-details strong, .shipping-details strong {
+                min-width: 100px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card text-center">
+            <div class="card-header">
+                <h2>Order Confirmation</h2>
+            </div>
+            <div class="card-body">
+                <h1 class="text-success"><i class="fas fa-check-circle"></i></h1>
+                <h3 class="card-title">Thank you for your order!</h3>
+                <p class="card-text">Your order has been placed successfully.</p>
+                
+                <div class="order-details">
+                    <h4>Order Details</h4>
+                    <p><strong>Order ID:</strong> #{{ order.id }}</p>
+                    <p><strong>Product:</strong> {{ order.product.name }}</p>
+                    <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+                    <p><strong>Total Amount:</strong> ₱{{ order.total_amount }}</p>
+                    <p><strong>Payment Method:</strong> {{ order.get_payment_method_display }}</p>
+                    <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+                </div>
+                
+                <div class="shipping-details">
+                    <h4>Shipping Details</h4>
+                    <p><strong>Address:</strong> {{ order.shipping_address.address }}</p>
+                    <p><strong>City:</strong> {{ order.shipping_address.city }}</p>
+                    <p><strong>Province:</strong> {{ order.shipping_address.province }}</p>
+                    <!-- <p><strong>Zip Code:</strong> {{ order.shipping_address.zipcode }}</p> -->
+                    <p><strong>Phone:</strong> {{ order.shipping_address.phone_number }}</p>
+                </div>
+                
+                <a href="{% url 'market_place' %}" class="btn">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1453 @@
+
+{% extends 'm_sidenav.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --card-shadow: 0 8px 20px rgba(112, 66, 16, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Settings Container */
+        .settings-container {
+            max-width: 1400px; /* Increased max-width for larger cards */
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+            padding: 1.5rem 0;
+            position: relative;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            border-radius: 2px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--medium-brown);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header h1 i {
+            color: var(--gold);
+            margin-right: 0.75rem;
+        }
+
+        .page-header .lead {
+            font-size: 1.1rem;
+            color: var(--light-brown);
+            font-weight: 400;
+        }
+
+        /* Settings Cards - FIXED LAYOUT */
+        .settings-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* Increased min-width for larger cards */
+            gap: 2rem; /* Increased gap for better spacing */
+            margin-bottom: 2rem;
+            justify-items: center; /* Center cards in their grid cells */
+        }
+
+        .settings-card {
+            background: var(--white);
+            border-radius: 16px; /* Slightly larger border radius */
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            height: 320px; /* Increased height for larger cards */
+            display: flex;
+            flex-direction: column;
+            width: 100%; /* Ensure cards take full width of grid cell */
+            max-width: 420px; /* Maximum width for cards */
+        }
+
+        .settings-card:hover {
+            transform: translateY(-8px) scale(1.02); /* Enhanced hover effect */
+            box-shadow: 0 15px 35px rgba(112, 66, 16, 0.2);
+        }
+
+        .settings-header {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            padding: 1.5rem 1.75rem; /* Increased padding */
+            font-size: 1.35rem; /* Slightly larger font */
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            min-height: 80px; /* Fixed header height */
+        }
+
+        .settings-header .settings-icon {
+            margin-right: 0.75rem;
+            font-size: 1.3rem; /* Slightly larger icon */
+            width: 28px;
+            text-align: center;
+        }
+
+        .settings-body {
+            padding: 2rem 1.75rem; /* Increased padding */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Better content distribution */
+        }
+
+        .settings-body h5 {
+            font-weight: 700; /* Bolder heading */
+            color: var(--medium-brown);
+            margin-bottom: 1rem; /* More spacing */
+            font-size: 1.3rem; /* Slightly larger */
+        }
+
+        .settings-body .text-muted {
+            color: #6c757d !important;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+            font-size: 1.05rem; /* Slightly larger text */
+            line-height: 1.5; /* Better readability */
+        }
+
+        /* Buttons */
+        .btn-gold {
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem; /* Larger button */
+            border-radius: 8px;
+            font-weight: 600; /* Bolder text */
+            font-size: 1.05rem; /* Slightly larger */
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn-gold:hover {
+            background: linear-gradient(to right, var(--bright-gold), var(--gold));
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(218, 148, 8, 0.4);
+        }
+
+        .btn-outline-gold {
+            color: var(--gold);
+            border: 2px solid var(--gold); /* Thicker border */
+            background: transparent;
+            padding: 0.75rem 1.5rem; /* Larger button */
+            border-radius: 8px;
+            font-weight: 600; /* Bolder text */
+            font-size: 1.05rem; /* Slightly larger */
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn-outline-gold:hover {
+            background: var(--gold);
+            color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(218, 148, 8, 0.4);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-title i {
+            margin-right: 0.75rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Form Styles */
+        .form-label {
+            font-weight: 500;
+            color: var(--medium-brown);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.25rem rgba(218, 148, 8, 0.25);
+        }
+
+        .password-strength-meter {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 3px;
+            background-color: #eee;
+            overflow: hidden;
+        }
+
+        .password-strength-meter div {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .requirement i {
+            margin-right: 5px;
+            font-size: 0.7rem;
+        }
+
+        .requirement.met {
+            color: #28a745;
+        }
+
+        .requirement.unmet {
+            color: #6c757d;
+        }
+
+        /* Address Cards */
+        .address-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .address-card:hover {
+            border-color: var(--light-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .badge-default {
+            background-color: var(--gold);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Location Preview */
+        .location-preview {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .location-preview h6 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--medium-brown);
+        }
+
+        .coordinates {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .coordinate {
+            flex: 1;
+            background-color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .coordinate-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .coordinate-value {
+            font-weight: 500;
+        }
+
+        /* Alert Container */
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        /* Profile Image Preview */
+        .profile-image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border: 3px solid var(--light-gold);
+            object-fit: cover;
+        }
+
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .settings-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .settings-card:nth-child(1) { animation-delay: 0.1s; }
+        .settings-card:nth-child(2) { animation-delay: 0.2s; }
+        .settings-card:nth-child(3) { animation-delay: 0.3s; }
+        .settings-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Responsive Styles - UPDATED FOR BETTER HORIZONTAL LAYOUT */
+        @media (max-width: 1200px) {
+            .settings-cards-container {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .settings-cards-container {
+                grid-template-columns: repeat(2, 1fr); /* Force 2 columns on medium screens */
+                gap: 1.5rem;
+            }
+            
+            .settings-card {
+                height: 300px; /* Slightly reduced height */
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .settings-cards-container {
+                grid-template-columns: 1fr; /* Single column on small screens */
+                gap: 1.25rem;
+            }
+            
+            .settings-card {
+                height: 280px; /* Further reduced height for mobile */
+                max-width: 100%;
+            }
+            
+            .settings-header {
+                padding: 1.25rem 1.5rem;
+                font-size: 1.25rem;
+                min-height: 70px;
+            }
+            
+            .settings-body {
+                padding: 1.5rem;
+            }
+            
+            .coordinates {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .modal-dialog {
+                margin: 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .settings-card {
+                height: 260px; /* Compact for very small screens */
+            }
+            
+            .settings-header {
+                padding: 1rem 1.25rem;
+                font-size: 1.2rem;
+                min-height: 65px;
+            }
+            
+            .settings-body {
+                padding: 1.25rem;
+            }
+            
+            .settings-body h5 {
+                font-size: 1.2rem;
+            }
+            
+            .settings-body .text-muted {
+                font-size: 1rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-gold {
+            color: var(--gold) !important;
+        }
+
+        .bg-light-brown {
+            background-color: rgba(150, 80, 14, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class=" content">
+    <div class="settings-container">
+        <!-- Page Header -->
+        <div class="page-header text-center">
+            <h1><i class="fas fa-cogs"></i> Settings</h1>
+            <p class="lead mb-0">Manage your profile, store, and preferences</p>
+        </div>
+        
+        <!-- Settings Cards Container -->
+        <div class="settings-cards-container">
+            <!-- Profile Settings Card -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <i class="fas fa-user settings-icon"></i> Profile Settings
+                </div>
+                <div class="settings-body">
+                    <h5>Personal Information</h5>
+                    <p class="text-muted">Update your profile details and profile picture</p>
+                    <div class="mt-auto">
+                        <button class="btn btn-gold w-100" data-bs-toggle="modal" data-bs-target="#profileModal">
+                            <i class="fas fa-edit me-2"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Store Settings Card (for admin/store owners) -->
+            {% if user.role == 'Admin' or user.store %}
+            <div class="settings-card">
+                <div class="settings-header">
+                    <i class="fas fa-store settings-icon"></i> Store Settings
+                </div>
+                <div class="settings-body">
+                    <h5>Store Information</h5>
+                    <p class="text-muted">Manage your store details, location, and branding</p>
+                    <div class="mt-auto">
+                        <button class="btn btn-gold w-100" data-bs-toggle="modal" data-bs-target="#storeModal">
+                            <i class="fas fa-edit me-2"></i> Edit Store
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Shipping Address Settings Card -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <i class="fas fa-shipping-fast settings-icon"></i> Shipping Addresses
+                </div>
+                <div class="settings-body">
+                    <h5>Delivery Addresses</h5>
+                    <p class="text-muted">Add and manage your shipping addresses</p>
+                    <div class="mt-auto">
+                        <button class="btn btn-gold w-100" data-bs-toggle="modal" data-bs-target="#shippingModal">
+                            <i class="fas fa-map-marker-alt me-2"></i> Manage Addresses
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Settings Card -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <i class="fas fa-shield-alt settings-icon"></i>Credentials information
+                </div>
+                <div class="settings-body">
+                    <h5>Account Information</h5>
+                    <p class="text-muted">View your password and security preferences</p>
+                    <div class="mt-auto">
+                        <button class="btn btn-outline-gold w-100" data-bs-toggle="modal" data-bs-target="#securityModal">
+                            <i class="fas fa-key me-2"></i> Security Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container for AJAX responses -->
+        <div class="alert-container" id="alertContainer"></div>
+
+        <!-- Profile Modal -->
+        <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-user"></i> Edit Profile</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="profileForm" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" name="first_name" id="first_name" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" name="last_name" id="last_name" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" name="username" id="username" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" name="email" id="email" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Leave blank to keep current password">
+                                <div class="password-strength-meter">
+                                    <div id="passwordStrengthBar"></div>
+                                </div>
+                                <div class="password-requirements" id="passwordRequirements">
+                                    <div class="requirement unmet" id="reqLength">
+                                        <i class="fas fa-circle"></i> At least 8 characters
+                                    </div>
+                                    <div class="requirement unmet" id="reqLowercase">
+                                        <i class="fas fa-circle"></i> Contains lowercase letter
+                                    </div>
+                                    <div class="requirement unmet" id="reqUppercase">
+                                        <i class="fas fa-circle"></i> Contains uppercase letter
+                                    </div>
+                                    <div class="requirement unmet" id="reqNumber">
+                                        <i class="fas fa-circle"></i> Contains number
+                                    </div>
+                                </div>
+                                <div class="form-text">Only enter a password if you want to change it</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="image_url" class="form-label">Profile Image</label>
+                                <input type="file" class="form-control" id="image_url" name="image_url" accept="image/*">
+                                <div class="text-center mt-3">
+                                    <label for="image_url" class="form-label">Old Profile Image</label>
+                                    <img id="profile_old"  src="{{ request.user.image_url }}" alt="Profile Image" class="img-thumbnail mt-2" style="max-height: 100px;">
+                                </div>
+                                <div class="text-center mt-3">
+                                     <label for="image_url" class="form-label">New Profile Image</label>
+                                    <img id="profile_preview" src="" alt="Profile Preview" class="profile-image-preview d-none">
+                                </div>
+                            </div>
+                        </div>
+
+                            
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-gold" id="profileSubmitBtn">
+                                <span class="loading-spinner spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Modal -->
+        <div class="modal fade" id="storeModal" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-store"></i> Edit Store Information</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="storeForm" enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label for="store_name" class="form-label">Store Name</label>
+                                        <input type="text" name="name" id="store_name" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="store_logo" class="form-label">Logo URL</label>
+                                        <input type="url" name="logo" id="store_logo" class="form-control" placeholder="https://...">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="store_description" class="form-label">Description</label>
+                                <textarea name="description" id="store_description" class="form-control" rows="4" placeholder="Describe your store..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="store_address" class="form-label">Store Address</label>
+                                <input type="text" name="address" id="store_address" class="form-control" placeholder="Street address">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="store_city" class="form-label">City</label>
+                                        <input type="text" name="city" id="store_city" class="form-control" placeholder="City">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="store_province" class="form-label">Province</label>
+                                        <input type="text" name="province" id="store_province" class="form-control" placeholder="Province">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Location Preview -->
+                            <div class="location-preview d-none" id="locationPreview">
+                                <h6><i class="fas fa-map-marker-alt"></i> Location Coordinates</h6>
+                                <div class="coordinates">
+                                    <div class="coordinate">
+                                        <div class="coordinate-label">Latitude</div>
+                                        <div class="coordinate-value" id="previewLatitude">--</div>
+                                    </div>
+                                    <div class="coordinate">
+                                        <div class="coordinate-label">Longitude</div>
+                                        <div class="coordinate-value" id="previewLongitude">--</div>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Coordinates will be automatically generated when you save the store information.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-gold">
+                                <span class="loading-spinner spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping Address Modal -->
+        <div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-shipping-fast"></i> Manage Shipping Addresses</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="mb-0">Your Shipping Addresses</h6>
+                            <button type="button" class="btn btn-gold btn-sm" id="addNewAddress">
+                                <i class="fas fa-plus"></i> Add New Address
+                            </button>
+                        </div>
+                        
+                        <div id="addressList" class="mb-4">
+                            <!-- Addresses will be loaded here -->
+                            <div class="text-center py-4" id="addressLoading">
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading addresses...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Address Form -->
+                        <div id="shippingFormContainer" class="d-none">
+                            <hr>
+                            <h6 class="mb-3">
+                                <i class="fas fa-edit"></i> 
+                                <span id="formTitle">Add New Address</span>
+                            </h6>
+                            
+                            <form id="shippingForm" enctype="multipart/form-data">
+                                <input type="hidden" name="address_id" id="address_id">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="phone_number" class="form-label">Phone Number</label>
+                                            <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="+63 XXX XXX XXXX">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="zipcode" class="form-label">Zipcode</label>
+                                            <input type="text" name="zipcode" id="zipcode" class="form-control" placeholder="Zipcode">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Street Address</label>
+                                    <input type="text" name="address" id="address" class="form-control" placeholder="Street, building, etc." required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="city" class="form-label">City</label>
+                                            <input type="text" name="city" id="city" class="form-control" placeholder="City" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="province" class="form-label">Province</label>
+                                            <input type="text" name="province" id="province" class="form-control" placeholder="Province" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" name="is_default" id="is_default" class="form-check-input">
+                                    <label class="form-check-label" for="is_default">
+                                        Set as default shipping address
+                                    </label>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-gold">
+                                        <span class="loading-spinner spinner-border spinner-border-sm me-2" role="status"></span>
+                                        <span id="submitBtnText">Save Address</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="cancelAddressEdit">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Modal -->
+        <div class="modal fade" id="securityModal" tabindex="-1" aria-labelledby="securityModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-shield-alt"></i>Credentials Information</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            For security reasons, password changes are handled through the profile settings.
+                        </div>
+                        
+                        <h6>Account Information</h6>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Username:</strong></div>
+                            <div class="col-sm-8" id="securityUsername">{{ user.username }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Email:</strong></div>
+                            <div class="col-sm-8" id="securityEmail">{{ user.email }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Role:</strong></div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-primary">{{ user.role }}</span>
+                            </div>
+                        </div>
+                         <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Profile Picture:</strong></div>
+                            <div class="col-sm-8">
+                                <img id="profile_preview"  src="{{ request.user.image_url }}" alt="Profile Image" class="img-thumbnail mt-2" style="max-height: 100px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CSRF Token for AJAX requests
+        const csrfToken = '{{ csrf_token }}';
+        
+        // Utility function to show alerts
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show shadow`;
+            alertDiv.innerHTML = `
+                <strong>${type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-triangle"></i>'}</strong>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.classList.add('fade-out');
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 5000);
+        }
+        
+        // Show/hide loading spinner
+        function toggleLoading(form, show) {
+            const spinner = form.querySelector('.loading-spinner');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            if (show) {
+                spinner.classList.remove('d-none');
+                submitBtn.disabled = true;
+            } else {
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const requirements = {
+                hasLength: false,
+                hasLowercase: false,
+                hasUppercase: false,
+                hasNumber: false
+            };
+            
+            // Check length
+            if (password.length >= 8) {
+                strength += 25;
+                requirements.hasLength = true;
+                document.getElementById('reqLength').classList.replace('unmet', 'met');
+            } else {
+                document.getElementById('reqLength').classList.replace('met', 'unmet');
+            }
+            
+            // Check lowercase
+            if (/[a-z]/.test(password)) {
+                strength += 25;
+                requirements.hasLowercase = true;
+                document.getElementById('reqLowercase').classList.replace('unmet', 'met');
+            } else {
+                document.getElementById('reqLowercase').classList.replace('met', 'unmet');
+            }
+            
+            // Check uppercase
+            if (/[A-Z]/.test(password)) {
+                strength += 25;
+                requirements.hasUppercase = true;
+                document.getElementById('reqUppercase').classList.replace('unmet', 'met');
+            } else {
+                document.getElementById('reqUppercase').classList.replace('met', 'unmet');
+            }
+            
+            // Check number
+            if (/[0-9]/.test(password)) {
+                strength += 25;
+                requirements.hasNumber = true;
+                document.getElementById('reqNumber').classList.replace('unmet', 'met');
+            } else {
+                document.getElementById('reqNumber').classList.replace('met', 'unmet');
+            }
+            
+            // Update strength bar
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            strengthBar.style.width = `${strength}%`;
+            
+            // Set color based on strength
+            if (strength === 0) {
+                strengthBar.style.backgroundColor = '#dc3545';
+            } else if (strength < 100) {
+                strengthBar.style.backgroundColor = '#fd7e14';
+            } else {
+                strengthBar.style.backgroundColor = '#28a745';
+            }
+            
+            return requirements;
+        }
+        
+        // Load user data when modals are opened
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile Modal
+            const profileModal = document.getElementById('profileModal');
+            profileModal.addEventListener('show.bs.modal', function() {
+                loadUserData();
+            });
+            
+            // Store Modal
+            const storeModal = document.getElementById('storeModal');
+            storeModal.addEventListener('show.bs.modal', function() {
+                loadUserData();
+            });
+            
+            // Shipping Modal
+            const shippingModal = document.getElementById('shippingModal');
+            shippingModal.addEventListener('show.bs.modal', function() {
+                loadShippingAddresses();
+            });
+        });
+        
+        // Load user data function
+        function loadUserData() {
+            fetch('/ajax/get-user-data/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.user_data) {
+                    // Populate profile form
+                    document.getElementById('first_name').value = data.user_data.first_name || '';
+                    document.getElementById('last_name').value = data.user_data.last_name || '';
+                    document.getElementById('username').value = data.user_data.username || '';
+                    document.getElementById('email').value = data.user_data.email || '';
+                    
+                    // Update security modal
+                    document.getElementById('securityUsername').textContent = data.user_data.username || '';
+                    document.getElementById('securityEmail').textContent = data.user_data.email || '';
+                    
+                    const preview = document.getElementById('profile_preview');
+                    if (data.user_data.image_url) {
+                        preview.src = data.user_data.image_url;
+                        preview.classList.remove('d-none');
+                    }
+                }
+                
+                // Load store data if available
+                if (data.store_data) {
+                    document.getElementById('store_name').value = data.store_data.name || '';
+                    document.getElementById('store_description').value = data.store_data.description || '';
+                    document.getElementById('store_logo').value = data.store_data.logo || '';
+                    document.getElementById('store_address').value = data.store_data.address || '';
+                    document.getElementById('store_city').value = data.store_data.city || '';
+                    document.getElementById('store_province').value = data.store_data.province || '';
+                    
+                    // Show location preview if coordinates exist
+                    if (data.store_data.latitude && data.store_data.longitude) {
+                        document.getElementById('previewLatitude').textContent = data.store_data.latitude;
+                        document.getElementById('previewLongitude').textContent = data.store_data.longitude;
+                        document.getElementById('locationPreview').classList.remove('d-none');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading user data:', error);
+                showAlert('Error loading user data', 'danger');
+            });
+        }
+        
+        // Profile Form Submit
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            
+            // Validate password if provided
+            if (password) {
+                const requirements = checkPasswordStrength(password);
+                if (!requirements.hasLength || !requirements.hasLowercase || 
+                    !requirements.hasUppercase || !requirements.hasNumber) {
+                    showAlert('Password must be at least 8 characters and contain uppercase, lowercase letters, and numbers', 'danger');
+                    return;
+                }
+            }
+            
+            const formData = new FormData(this);
+            toggleLoading(this, true);
+            
+            fetch('/ajax/update-profile/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toggleLoading(this, false);
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
+                    
+                    // Update profile preview if image was uploaded
+                    if (data.user_data && data.user_data.image_url) {
+                        document.getElementById('profile_preview').src = data.user_data.image_url;
+                    }
+                    
+                    // Reset password field
+                    document.getElementById('password').value = '';
+                    checkPasswordStrength(''); // Reset strength meter
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                toggleLoading(this, false);
+                console.error('Error:', error);
+                showAlert('An error occurred while updating profile', 'danger');
+            });
+        });
+        
+        // Store Form Submit
+        document.getElementById('storeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            toggleLoading(this, true);
+            
+            fetch('/ajax/update-store/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toggleLoading(this, false);
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    
+                    // Update location preview with new coordinates
+                    if (data.store_data && data.store_data.latitude && data.store_data.longitude) {
+                        document.getElementById('previewLatitude').textContent = data.store_data.latitude;
+                        document.getElementById('previewLongitude').textContent = data.store_data.longitude;
+                        document.getElementById('locationPreview').classList.remove('d-none');
+                    }
+                    
+                    // Don't hide modal immediately to show the coordinates
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('storeModal')).hide();
+                    }, 2000);
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                toggleLoading(this, false);
+                console.error('Error:', error);
+                showAlert('An error occurred while updating store', 'danger');
+            });
+        });
+        
+        // Password strength real-time validation
+        document.getElementById('password').addEventListener('input', function(e) {
+            checkPasswordStrength(e.target.value);
+        });
+        
+        // Shipping Address Functions
+        function loadShippingAddresses() {
+            const addressList = document.getElementById('addressList');
+            const loading = document.getElementById('addressLoading');
+            
+            loading.style.display = 'block';
+            
+            fetch('/ajax/get-user-data/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                addressList.innerHTML = '';
+                
+                if (data.shipping_addresses && data.shipping_addresses.length > 0) {
+                    data.shipping_addresses.forEach(address => {
+                        const addressCard = document.createElement('div');
+                        addressCard.className = 'address-card mb-3';
+                        addressCard.innerHTML = `
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="card-title mb-2">
+                                            <i class="fas fa-map-marker-alt text-warning me-2"></i>
+                                            ${address.address}
+                                            ${address.is_default ? '<span class="badge badge-default ms-2">Default</span>' : ''}
+                                        </h6>
+                                        <p class="card-text text-muted mb-1">
+                                            <i class="fas fa-city me-2"></i>
+                                            ${address.city}, ${address.province}
+                                            ${address.zipcode ? ' - ' + address.zipcode : ''}
+                                        </p>
+                                        ${address.phone_number ? `<p class="card-text text-muted mb-0"><i class="fas fa-phone me-2"></i>${address.phone_number}</p>` : ''}
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editAddress(${address.id})" title="Edit Address">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAddress(${address.id})" title="Delete Address">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        addressList.appendChild(addressCard);
+                    });
+                } else {
+                    addressList.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No shipping addresses found</h5>
+                            <p class="text-muted">Add your first shipping address to get started</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error loading addresses:', error);
+                showAlert('Error loading shipping addresses', 'danger');
+                addressList.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <h5 class="text-danger">Error Loading Addresses</h5>
+                        <p class="text-muted">Please try again later</p>
+                    </div>
+                `;
+            });
+        }
+        
+        // Add new address
+        document.getElementById('addNewAddress').addEventListener('click', function() {
+            document.getElementById('shippingFormContainer').classList.remove('d-none');
+            document.getElementById('shippingForm').reset();
+            document.getElementById('address_id').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Address';
+            document.getElementById('submitBtnText').textContent = 'Save Address';
+            
+            // Scroll to form
+            document.getElementById('shippingFormContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        });
+        
+        // Cancel address edit
+        document.getElementById('cancelAddressEdit').addEventListener('click', function() {
+            document.getElementById('shippingFormContainer').classList.add('d-none');
+            document.getElementById('shippingForm').reset();
+        });
+        
+        // Edit address function
+        function editAddress(addressId) {
+            fetch('/ajax/get-user-data/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const address = data.shipping_addresses.find(addr => addr.id === addressId);
+                if (address) {
+                    document.getElementById('address_id').value = address.id;
+                    document.getElementById('phone_number').value = address.phone_number || '';
+                    document.getElementById('address').value = address.address || '';
+                    document.getElementById('city').value = address.city || '';
+                    document.getElementById('province').value = address.province || '';
+                    document.getElementById('zipcode').value = address.zipcode || '';
+                    document.getElementById('is_default').checked = address.is_default;
+                    
+                    document.getElementById('shippingFormContainer').classList.remove('d-none');
+                    document.getElementById('formTitle').textContent = 'Edit Address';
+                    document.getElementById('submitBtnText').textContent = 'Update Address';
+                    
+                    // Scroll to form
+                    document.getElementById('shippingFormContainer').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading address:', error);
+                showAlert('Error loading address data', 'danger');
+            });
+        }
+        
+        // Delete address function
+        function deleteAddress(addressId) {
+            if (confirm('Are you sure you want to delete this shipping address? This action cannot be undone.')) {
+                const formData = new FormData();
+                formData.append('address_id', addressId);
+                
+                fetch('/ajax/delete-shipping-address/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        loadShippingAddresses(); // Reload the address list
+                        
+                        // Hide form if it's open
+                        document.getElementById('shippingFormContainer').classList.add('d-none');
+                    } else {
+                        showAlert(data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('An error occurred while deleting address', 'danger');
+                });
+            }
+        }
+        
+        // Shipping Form Submit
+        document.getElementById('shippingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            toggleLoading(this, true);
+            
+            fetch('/ajax/update-shipping-address/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toggleLoading(this, false);
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    document.getElementById('shippingFormContainer').classList.add('d-none');
+                    loadShippingAddresses(); // Reload the address list
+                    this.reset();
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                toggleLoading(this, false);
+                console.error('Error:', error);
+                showAlert('An error occurred while saving address', 'danger');
+            });
+        });
+        
+        // Image preview functionality
+        document.getElementById('image_url').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showAlert('Please select a valid image file', 'danger');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('Image file size must be less than 5MB', 'danger');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('profile_preview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Form validation
+        function validateForm(form) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            return isValid;
+        }
+        
+        // Add validation to all forms
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!validateForm(this)) {
+                    e.preventDefault();
+                    showAlert('Please fill in all required fields', 'danger');
+                }
+            });
+            
+            // Real-time validation
+            const requiredFields = form.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                field.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+                
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid') && this.value.trim()) {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+        });
+        
+        // Phone number formatting
+        document.getElementById('phone_number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('63')) {
+                value = value.substring(2);
+            }
+            if (value.length > 0) {
+                value = '+63 ' + value.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+            }
+            e.target.value = value;
+        });
+        
+        // Auto-hide alerts when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.alert')) {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    if (!alert.classList.contains('fade-out')) {
+                        setTimeout(() => {
+                            alert.classList.add('fade-out');
+                            setTimeout(() => alert.remove(), 500);
+                        }, 100);
+                    }
+                });
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC to close modals
+            if (e.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal.show');
+                openModals.forEach(modal => {
+                    bootstrap.Modal.getInstance(modal).hide();
+                });
+            }
+            
+            // Ctrl+S to save current form
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                const activeModal = document.querySelector('.modal.show');
+                if (activeModal) {
+                    const form = activeModal.querySelector('form');
+                    if (form && !form.querySelector('button[type="submit"]').disabled) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+        
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltips = document.querySelectorAll('[title]');
+            tooltips.forEach(tooltip => {
+                new bootstrap.Tooltip(tooltip);
+            });
+        });
+        
+        console.log('🎉 Settings page loaded successfully!');
+    </script>
+{% endblock %}

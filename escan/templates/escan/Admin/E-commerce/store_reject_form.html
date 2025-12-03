@@ -1,0 +1,7 @@
+<h2>Reject Application - {{ validation.full_name }}</h2>
+<form method="post">
+  {% csrf_token %}
+  <label for="reason">Reason:</label><br>
+  <textarea name="rejection_reason" rows="4" cols="40"></textarea><br><br>
+  <button type="submit">Reject</button>
+</form>

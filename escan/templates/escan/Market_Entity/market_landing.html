@@ -1,0 +1,393 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MARKET LANDING</title>
+     <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+       :root {
+            --primary: #DA9408;
+            --dark-green: #1B4D3E;
+            --medium-brown: #704210;
+            --light-green: #4CAF50;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --light-gold: #FBD576;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --light-brown: #96500E;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+       /* Top Navigation - Fixed and Responsive */
+        .topnav {
+            background-color: var(--medium-brown);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            height: 80px;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        /* Left side - Brand */
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .nav-brand img {
+            height: 50px;
+            width: 50px;
+            margin-right: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+        }
+        
+        /* Content area with padding to account for fixed navbar */
+        .content {
+            padding-top: 100px;
+            padding-bottom: 40px;
+        }
+        
+        /* Intro section */
+        .market-intro {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+        
+        .market-intro h1 {
+            color: var(--medium-brown);
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .market-intro p {
+            color: var(--light-brown);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-size: 1.2rem;
+        }
+        
+        /* Animation */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Settings icon styles */
+        .settings-icon {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .s_icon {
+            color: var(--light-gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .settings-dropdown a {
+            color: var(--dark);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .settings-dropdown a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .settings-icon:hover .settings-dropdown {
+            display: block;
+        }
+        
+        /* Market Cards Container */
+        .market-cards {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Individual Card Styles */
+        .market-card {
+            width: 100%;
+            max-width: 500px;
+            height: 500px; /* Increased height for better text visibility */
+            background-color: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            text-decoration: none;
+            position: relative;
+            animation: slideInUp 0.6s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .market-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(218, 148, 8, 0.3);
+        }
+        
+        .market-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary) 100%);
+            z-index: 2;
+        }
+        
+        .market-card-image {
+            width: 100%;
+            height: 280px; /* Adjusted image height */
+            overflow: hidden;
+        }
+        
+        .market-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .market-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        .market-card-content {
+            padding: 25px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,1));
+            position: relative;
+        }
+        
+        .market-card-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.9));
+            z-index: -1;
+        }
+        
+        .market-card-content h3 {
+            font-size: 1.8rem;
+            color: var(--medium-brown);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .market-card-content p {
+            font-size: 1.1rem;
+            color: var(--light-brown);
+            margin: 0;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .market-cards {
+                gap: 20px;
+            }
+            
+            .market-card {
+                max-width: 100%;
+                height: 450px;
+            }
+            
+            .market-card-image {
+                height: 230px;
+            }
+            
+            .market-intro h1 {
+                font-size: 2rem;
+            }
+            
+            .market-intro p {
+                font-size: 1rem;
+            }
+            
+            .market-card-content h3 {
+                font-size: 1.6rem;
+            }
+            
+            .market-card-content p {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .market-card {
+                height: 400px;
+            }
+            
+            .market-card-image {
+                height: 200px;
+            }
+            
+            .market-card-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+   <div class="topnav">
+      <a href="#" class="nav-brand">
+                <img src="{% static 'img/LogoW.png' %}" alt="Logo">
+                <span>Market</span>
+            </a>
+     <div class="settings-icon">
+        <div class="s_icon">
+            <i class="fas fa-cog"></i>
+        </div>
+        <div class="settings-dropdown">
+            <a href="{% url 'm_setting' %}"><i class="fas fa-user"></i> Setting Detail</a>
+            <!-- <a href="#" onclick="resetUserData(); return false;"><i class="fas fa-redo"></i> Reset Data</a> -->
+            <a href="{% url 'logout' %}" style="color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+     </div>
+   </div>
+
+    
+    <div class="content">
+        
+        <div class="market-intro">
+            <h1>Explore Our Marketing Tools</h1>
+            <p>
+               Discover helpful tools to grow your business. From our marketplace to your own store, we give you everything you need to succeed.
+            </p>
+        </div>
+        
+        <div class="market-cards">
+            <!--MarketPlace -->
+            <a href="{% url 'market_place' %}" class="market-card">
+                <div class="market-card-image">
+                    <img src="{% static 'img/MarketPlace BanaeSCAN.gif' %}" alt="MarketPlace">
+                </div>
+                <div class="market-card-content">
+                    <h3>MarketPlace</h3>
+                    <p>Browse and purchase products from our marketplace featuring a wide range of items from trusted local sellers.</p>
+                </div>
+            </a>
+            
+            <!-- My Store -->
+            <a href="{% url 'my_store_dashboard' %}" class="market-card">
+                <div class="market-card-image">
+                    <img src="{% static 'img/Mystore BanaeSCAN.gif' %}" alt="My Store">
+                </div>
+                <div class="market-card-content">
+                    <h3>My Store</h3>
+                    <p>Create and manage your own storefront. List products, manage inventory, and connect with customers.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Add hover effects with JavaScript for enhanced compatibility
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.market-card');
+            
+            cards.forEach(card => {
+                // Store original box shadow
+                const originalBoxShadow = card.style.boxShadow;
+                
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-15px) scale(1.02)';
+                    this.style.boxShadow = '0 20px 40px rgba(218, 148, 8, 0.3)';
+                    
+                    // Scale the image
+                    const img = this.querySelector('img');
+                    if (img) {
+                        img.style.transform = 'scale(1.05)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                    this.style.boxShadow = originalBoxShadow;
+                    
+                    // Reset the image
+                    const img = this.querySelector('img');
+                    if (img) {
+                        img.style.transform = '';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

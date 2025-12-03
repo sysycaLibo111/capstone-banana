@@ -1,0 +1,1394 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(251, 213, 118, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(218, 148, 8, 0.3);
+        }
+
+        .menu {
+            padding: 20px 0;
+        }
+
+        .menu a {
+            display: block;
+            color: var(--light-gold);
+            padding: 12px 25px;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .menu a:hover, .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .menu a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            margin: 0;
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        .search-box {
+            display: flex;
+            font-size: 20px;
+            align-items: center;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 30px;
+            padding: 5px 15px;
+            border: 1px solid rgba(112, 66, 16, 0.2);
+            transition: all 0.3s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.2);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 8px;
+            width: 200px;
+        }
+
+        .search-box button {
+            background: none;
+            border: none;
+            color: var(--gold);
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            border: none;
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(218, 148, 8, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--medium-brown);
+            border: none;
+            color: var(--white);
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background-color: var(--gold);
+            border: none;
+            color: var(--white);
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border: none;
+            color: var(--white);
+        }
+
+        .btn-dark {
+            background-color: var(--dark-brown);
+            border: none;
+            color: var(--white);
+        }
+
+        .table-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            font-size: 20px;
+            border-spacing: 0;
+        }
+
+        .table th {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            padding: 15px;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(112, 66, 16, 0.1);
+            vertical-align: middle;
+        }
+
+        .table tr:hover td {
+            background-color: rgba(251, 213, 118, 0.1);
+        }
+
+        .tb-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid rgba(112, 66, 16, 0.1);
+        }
+
+        .actions-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .actions-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-edit {
+            font-size: 20px;
+            background-color: var(--gold);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            font-size: 20px;
+            background-color: #dc3545;
+            color: var(--white);
+        }
+
+        .description {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .description:hover {
+            white-space: normal;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
+            background-color: var(--white);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .alert {
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-title {
+            font-weight: 500;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.25rem rgba(218, 148, 8, 0.25);
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+            }
+            
+            .burger {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-box {
+                width: 100%;
+                margin: 10px 0;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .content {
+                padding: 15px;
+            }
+            
+            .table th, .table td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .tb-image {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-container {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="burger" id="burger" onclick="toggleNav()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'my_store_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'my_store' %}" class="active"><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'my_store_orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'u_customer_list' %}"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <div class="nav-bar">
+            <h2 class="page-title">PRODUCT LIST</h2>
+        
+            <div class="action-buttons">
+                <div class="search-box">
+                    <input type="text" id="searchBox" placeholder="Search products...">
+                    <button onclick="searchProduct()"><i class="fas fa-search"></i></button>
+                </div>
+
+                {% if not has_seller_application %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sellerApplicationModal">
+                    <i class="fas fa-store"></i> Apply to Become Seller
+                </button>
+                {% endif %}
+
+                {% if is_approved_seller and not has_store %}
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#storeModal">
+                    <i class="fas fa-store"></i> Create Store
+                </button>
+                {% endif %}
+
+                {% if has_store %}
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#storeModal">
+                    <i class="fas fa-store"></i> Edit Store
+                </button>
+                {% endif %}
+
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal" {% if not has_store %}disabled{% endif %}>
+                    <i class="fas fa-plus-circle"></i> Add Product
+                </button>
+                <a href="{% url 'u_category_list' %}" class="btn btn-warning">
+                    <i class="fas fa-tags"></i> Categories
+                </a>
+                <button class="btn btn-info" onclick="printProducts()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="btn btn-dark" onclick="undoAction()">
+                    <i class="fas fa-undo"></i> Undo
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <!-- Alert Container for Messages -->
+            <div class="alert-container mb-3"></div>
+            
+            {% if messages %}
+            <div class="messages-container mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if products %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th class="description">Description</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Image</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name|default:"-" }}</td>
+                    <td class="description" title="{{ product.description }}">
+                        {{ product.description|truncatechars:50|default:"-" }}
+                    </td>
+                    <td>₱{{ product.price }}</td>
+                    <td>{{ product.stock }}</td>
+                    <td>
+                        <img class="tb-image"
+                             src="{% if product.image_url %}{{ product.image_url }}{% else %}{% static 'img/no-image.png' %}{% endif %}"
+                             alt="{{ product.name }}">
+                    </td>
+                    <td>
+                        <button class="btn btn-edit actions-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editProductModal{{ product.id }}">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                        <button class="btn btn-delete actions-btn"
+                                onclick="confirmDelete({{ product.id }})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                {% if has_store %}
+                No products found. Click "Add Product" to get started.
+                {% else %}
+                You need to create a store before you can add products.
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-container mb-3"></div>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="addProductForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="add_name" class="form-label">Product Name *</label>
+                                    <input type="text" class="form-control" id="add_name" name="name" required>
+                                    <div class="invalid-feedback" id="name-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="add_category" class="form-label">Category *</label>
+                                    <select class="form-control" id="add_category" name="category" required>
+                                        <option value="">Select a category</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback" id="category-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="add_price" class="form-label">Price *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" class="form-control" id="add_price" name="price" step="0.01" min="0" required>
+                                    </div>
+                                    <div class="invalid-feedback" id="price-error"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="add_stock" class="form-label">Stock *</label>
+                                    <input type="number" class="form-control" id="add_stock" name="stock" min="0" required>
+                                    <div class="invalid-feedback" id="stock-error"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="add_description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="add_description" name="description" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="add_image_url" class="form-label">Product Image</label>
+                                    <input type="file" class="form-control" id="add_image_url" name="image_url" accept="image/*">
+                                    <div class="form-text">Max size: 5MB. Supported formats: JPG, PNG, GIF</div>
+                                    <div class="invalid-feedback" id="image_url-error"></div>
+                                </div>
+                                <div class="image-preview mb-3 text-center">
+                                    <img id="addImagePreview" src="#" alt="Image Preview" class="img-thumbnail d-none" style="max-height: 150px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="addSubmitBtn">
+                                <span class="spinner-border spinner-border-sm d-none" id="addSpinner" role="status" aria-hidden="true"></span>
+                                Save Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modals -->
+    {% for product in products %}
+    <div class="modal fade" id="editProductModal{{ product.id }}" tabindex="-1" aria-labelledby="editProductModalLabel{{ product.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProductModalLabel{{ product.id }}">Edit Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-container mb-3"></div>
+                    
+                    <form method="POST" enctype="multipart/form-data" class="edit-product-form" data-product-id="{{ product.id }}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_name{{ product.id }}" class="form-label">Product Name *</label>
+                                    <input type="text" class="form-control" id="edit_name{{ product.id }}" name="name" value="{{ product.name }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_category{{ product.id }}" class="form-label">Category *</label>
+                                    <select class="form-control" id="edit_category{{ product.id }}" name="category" required>
+                                        <option value="">Select a category</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_price{{ product.id }}" class="form-label">Price *</label>
+                                    <input type="number" class="form-control" id="edit_price{{ product.id }}" name="price" step="0.01" min="0" value="{{ product.price }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_stock{{ product.id }}" class="form-label">Stock *</label>
+                                    <input type="number" class="form-control" id="edit_stock{{ product.id }}" name="stock" min="0" value="{{ product.stock }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="edit_description{{ product.id }}" class="form-label">Description</label>
+                                    <textarea class="form-control" id="edit_description{{ product.id }}" name="description" rows="3">{{ product.description }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_image_url{{ product.id }}" class="form-label">Product Image</label>
+                                    <input type="file" class="form-control" id="edit_image_url{{ product.id }}" name="image_url" accept="image/*">
+                                    <div class="form-text">Leave blank to keep current image</div>
+                                </div>
+                                <div class="current-image mb-3 text-center">
+                                    {% if product.image_url %}
+                                    <p>Current Image:</p>
+                                    <img src="{{ product.image_url }}" alt="Current Product Image" class="img-thumbnail" style="max-height: 150px;">
+                                    {% else %}
+                                    <p>No image uploaded</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Update Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Seller Application Modal -->
+    <div class="modal fade" id="sellerApplicationModal" tabindex="-1" aria-labelledby="sellerApplicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sellerApplicationModalLabel">Apply to Become a Seller</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-container mb-3"></div>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="sellerApplicationForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">First Name *</label>
+                            <input type="text" class="form-control" id="id_first_name" name="first_name" required>
+                            <div class="invalid-feedback" id="first_name-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">Last Name *</label>
+                            <input type="text" class="form-control" id="id_last_name" name="last_name" required>
+                            <div class="invalid-feedback" id="last_name-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_phone_number" class="form-label">Phone Number *</label>
+                            <input type="text" class="form-control" id="id_phone_number" name="phone_number" required>
+                            <div class="invalid-feedback" id="phone_number-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_address" class="form-label">Address *</label>
+                            <input type="text" class="form-control" id="id_address" name="address" required>
+                            <div class="invalid-feedback" id="address-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_city" class="form-label">City *</label>
+                            <input type="text" class="form-control" id="id_city" name="city" required>
+                            <div class="invalid-feedback" id="city-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_province" class="form-label">Province *</label>
+                            <input type="text" class="form-control" id="id_province" name="province" required>
+                            <div class="invalid-feedback" id="province-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_id_picture" class="form-label">ID Picture *</label>
+                            <input type="file" class="form-control" id="id_id_picture" name="id_picture" accept="image/*" required>
+                            <div class="form-text">Upload a clear picture of your government-issued ID</div>
+                            <div class="invalid-feedback" id="id_picture-error"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="submitApplicationBtn">
+                                <span class="spinner-border spinner-border-sm d-none" id="applicationSpinner" role="status"></span>
+                                Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store Modal (Create/Edit) -->
+    <div class="modal fade" id="storeModal" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="storeModalLabel">{% if has_store %}Edit Store{% else %}Create Store{% endif %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>                                                  
+                <div class="modal-body">
+                    <div class="alert-container mb-3"></div>
+                    
+                    <form method="POST" enctype="multipart/form-data" id="storeForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="store_name" class="form-label">Store Name *</label>
+                            <input type="text" class="form-control" id="store_name" name="store_name" value="{% if has_store %}{{ store.name }}{% endif %}" required>
+                            <div class="invalid-feedback" id="store_name-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="store_description" class="form-label">Store Description</label>
+                            <textarea class="form-control" id="store_description" name="store_description" rows="3">{% if has_store %}{{ store.description }}{% endif %}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="store_logo" class="form-label">Store Logo</label>
+                            <input type="file" class="form-control" id="store_logo" name="store_logo" accept="image/*">
+                            <div class="form-text">Upload a logo for your store</div>
+                            <div class="invalid-feedback" id="store_logo-error"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="storeSubmitBtn">
+                                <span class="spinner-border spinner-border-sm d-none" id="storeSpinner" role="status"></span>
+                                {% if has_store %}Update Store{% else %}Create Store{% endif %}
+                            </button>
+                        </div>
+                    </form>
+ </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    
+    // Toggle sidebar on mobile
+    function toggleNav() {
+        const sidebar = document.getElementById('sidebar');
+        const burger = document.getElementById('burger');
+        sidebar.classList.toggle('active');
+        burger.classList.toggle('active');
+    }
+    
+    // ============================================
+    // SEARCH PRODUCTS
+    // ============================================
+    function searchProduct() {
+        var query = $('#searchBox').val().trim();
+        if (!query) {
+            alert('Please enter a search term');
+            return;
+        }
+        
+        $.getJSON("{% url 'u_search_products' %}?query=" + encodeURIComponent(query), function(data) {
+            var tbody = $('tbody');
+            tbody.empty();
+            
+            if (data.results.length === 0) {
+                tbody.append('<tr><td colspan="7" class="text-center">No products found</td></tr>');
+                return;
+            }
+            
+            data.results.forEach(function(product) {
+                var description = product.description || '';
+                var descDisplay = description ? (description.substring(0, 50) + (description.length > 50 ? '...' : '')) : '-';
+                var imageUrl = product.image_url || '{% static "img/no-image.png" %}';
+                
+                var row = '<tr>' +
+                    '<td>' + product.name + '</td>' +
+                    '<td>' + (product.category || '-') + '</td>' +
+                    '<td class="description" title="' + description + '">' + descDisplay + '</td>' +
+                    '<td>₱' + product.price + '</td>' +
+                    '<td>' + product.stock + '</td>' +
+                    '<td><img class="tb-image" src="' + imageUrl + '" alt="' + product.name + '"></td>' +
+                    '<td>' +
+                    '<button class="btn btn-edit actions-btn" data-bs-toggle="modal" data-bs-target="#editProductModal' + product.id + '">' +
+                    '<i class="bi bi-pencil-square"></i> Edit' +
+                    '</button> ' +
+                    '<button class="btn btn-delete actions-btn" onclick="confirmDelete(' + product.id + ')">' +
+                    '<i class="fas fa-trash"></i> Delete' +
+                    '</button>' +
+                    '</td>' +
+                    '</tr>';
+                tbody.append(row);
+            });
+        }).fail(function() {
+            alert('Error searching products');
+        });
+    }
+    
+    // ============================================
+    // DELETE PRODUCT
+    // ============================================
+    function confirmDelete(productId) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            $.ajax({
+                url: `/u_delete_product/${productId}/`,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                beforeSend: function() {
+                    // Show loading state if needed
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert('success', response.message);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        alert(response.message || 'Error deleting product');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMsg = 'Error deleting product';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMsg = response.message;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                    alert(errorMsg);
+                }
+            });
+        }
+    }
+    
+    // ============================================
+    // UNDO LAST ACTION
+    // ============================================
+    function undoAction() {
+        if (!confirm('Are you sure you want to undo the last action?')) return;
+        
+        $.ajax({
+            url: "{% url 'u_undo_last_action' %}",
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert(response.message || 'Nothing to undo');
+                }
+            },
+            error: function() {
+                alert('Error undoing action');
+            }
+        });
+    }
+    
+    // ============================================
+    // PRINT PRODUCTS
+    // ============================================
+    function printProducts() {
+        var printWindow = window.open('', '_blank');
+        var now = new Date();
+        var dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        
+        var tableRows = document.querySelectorAll('.table tbody tr');
+        var products = [];
+        
+        tableRows.forEach(function(row) {
+            var cells = row.querySelectorAll('td');
+            if (cells.length >= 6) {
+                products.push({
+                    name: cells[0].textContent.trim(),
+                    category: cells[1].textContent.trim(),
+                    description: cells[2].textContent.trim() || cells[2].getAttribute('title') || '-',
+                    price: cells[3].textContent.trim(),
+                    stock: cells[4].textContent.trim(),
+                    image_url: cells[5].querySelector('img') ? cells[5].querySelector('img').src : ''
+                });
+            }
+        });
+        
+        var storeName = "{{ request.user.store.name|default:'My Store'|escapejs }}";
+        var logoUrl = "{% static 'img/PrintLogo.jpg' %}";
+        
+        var html = '<html><head><title>Product List</title><style>' +
+            'body { font-family: Arial, sans-serif; margin: 20px; }' +
+            'h1 { color: #333; }' +
+            '.header { display: flex; align-items: center; margin-bottom: 20px; }' +
+            '.logo { width: 60px; height: 60px; margin-right: 20px; }' +
+            '.date { margin-bottom: 20px; color: #666; }' +
+            'table { width: 100%; border-collapse: collapse; margin-top: 20px; }' +
+            'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }' +
+            'th { background-color: #f2f2f2; }' +
+            'img { max-width: 100px; max-height: 100px; }' +
+            '</style></head><body>' +
+            '<div class="header">' +
+            '<img src="' + logoUrl + '" class="logo" alt="Logo">' +
+            '<h1>Product List - ' + storeName + '</h1>' +
+            '</div>' +
+            '<div class="date">Generated on: ' + dateStr + '</div>' +
+            '<table><thead><tr>' +
+            '<th>Name</th><th>Category</th><th>Description</th><th>Price</th><th>Stock</th><th>Image</th>' +
+            '</tr></thead><tbody>';
+        
+        for (var i = 0; i < products.length; i++) {
+            var product = products[i];
+            html += '<tr>' +
+                '<td>' + product.name + '</td>' +
+                '<td>' + product.category + '</td>' +
+                '<td>' + product.description + '</td>' +
+                '<td>' + product.price + '</td>' +
+                '<td>' + product.stock + '</td>' +
+                '<td><img src="' + product.image_url + '" alt="Product Image"></td>' +
+                '</tr>';
+        }
+        
+        html += '</tbody></table></body></html>';
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    // ============================================
+    // HELPER FUNCTION: SHOW ALERT
+    // ============================================
+    function showAlert(type, message, containerId = '.table-container .alert-container') {
+        const alertHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        $(containerId).html(alertHTML);
+    }
+
+    function showModalAlert(modalId, type, message) {
+        const alertHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        $(`#${modalId} .alert-container`).html(alertHTML);
+    }
+
+    // ============================================
+    // HELPER FUNCTION: DISPLAY FORM ERRORS
+    // ============================================
+    function displayFormErrors(errors, prefix = '') {
+        for (const [field, errorList] of Object.entries(errors)) {
+            const fieldId = prefix ? `${prefix}-${field}` : field;
+            const fieldElement = $(`#${fieldId}, #id_${field}, #store_${field}, #add_${field}`);
+            const errorElement = $(`#${field}-error, #${fieldId}-error, #store-${field}-error`);
+            
+            if (fieldElement.length) {
+                fieldElement.addClass('is-invalid');
+                if (errorElement.length) {
+                    const errorText = Array.isArray(errorList) ? errorList[0] : errorList;
+                    errorElement.text(errorText).show();
+                }
+            }
+        }
+    }
+
+    function clearFormErrors(formId) {
+        $(`#${formId} .is-invalid`).removeClass('is-invalid');
+        $(`#${formId} .invalid-feedback`).text('').hide();
+    }
+
+    // ============================================
+    // DOCUMENT READY
+    // ============================================
+    $(document).ready(function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // ============================================
+        // ADD PRODUCT IMAGE PREVIEW
+        // ============================================
+        $('#add_image_url').change(function() {
+            var file = this.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#addImagePreview').attr('src', e.target.result).removeClass('d-none');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ============================================
+        // STORE FORM SUBMISSION
+        // ============================================
+        $('#storeForm').on('submit', function(e) {
+            e.preventDefault();
+            console.log('Store form submitted');
+            
+            const formData = new FormData(this);
+            const isEdit = {{ has_store|yesno:"true,false" }};
+            const url = isEdit ? "{% url 'u_update_store' %}" : "{% url 'u_create_store' %}";
+            const submitBtn = $('#storeSubmitBtn');
+            const spinner = $('#storeSpinner');
+            
+            console.log('URL:', url);
+            console.log('Is Edit:', isEdit);
+            
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+            clearFormErrors('storeForm');
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    console.log('Store form success:', response);
+                    if (response.success) {
+                        showModalAlert('storeModal', 'success', response.message);
+                        setTimeout(function() {
+                            $('#storeModal').modal('hide');
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        if (response.errors) {
+                            displayFormErrors(response.errors, 'store');
+                        }
+                        showModalAlert('storeModal', 'danger', response.message || 'Error processing store form');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Store form error:', error);
+                    console.error('Response:', xhr.responseText);
+                    
+                    let errorMsg = 'An error occurred while processing your request';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) errorMsg = response.message;
+                        if (response.errors) displayFormErrors(response.errors, 'store');
+                    } catch (e) {
+                        errorMsg = 'Server error: ' + xhr.status + ' - ' + error;
+                    }
+                    
+                    showModalAlert('storeModal', 'danger', errorMsg);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                }
+            });
+        });
+
+        // ============================================
+        // ADD PRODUCT FORM SUBMISSION
+        // ============================================
+        $('#addProductForm').on('submit', function(e) {
+            e.preventDefault();
+            console.log('Add product form submitted');
+            
+            const formData = new FormData(this);
+            const submitBtn = $('#addSubmitBtn');
+            const spinner = $('#addSpinner');
+            
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+            clearFormErrors('addProductForm');
+            
+            $.ajax({
+                url: "{% url 'u_add_product' %}",
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    console.log('Add product success:', response);
+                    if (response.success) {
+                        $('#addProductModal').modal('hide');
+                        showAlert('success', response.message);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        if (response.errors) {
+                            displayFormErrors(response.errors, 'add');
+                        }
+                        showModalAlert('addProductModal', 'danger', response.message || 'Please correct the errors below');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Add product error:', xhr.responseText);
+                    let errorMsg = 'An error occurred while adding the product';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMsg = response.message;
+                        }
+                        if (response.errors) {
+                            displayFormErrors(response.errors, 'add');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                    showModalAlert('addProductModal', 'danger', errorMsg);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                }
+            });
+        });
+
+        // ============================================
+        // EDIT PRODUCT FORM SUBMISSION
+        // ============================================
+        $(document).on('submit', '.edit-product-form', function(e) {
+            e.preventDefault();
+            console.log('Edit product form submitted');
+            
+            const form = $(this);
+            const productId = form.data('product-id');
+            const formData = new FormData(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const modalId = `editProductModal${productId}`;
+            
+            submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Updating...');
+            clearFormErrors(modalId);
+            
+            $.ajax({
+                url: `/u_edit_product/${productId}/`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    console.log('Edit product success:', response);
+                    if (response.success) {
+                        $(`#${modalId}`).modal('hide');
+                        showAlert('success', response.message);
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        if (response.errors) {
+                            displayFormErrors(response.errors);
+                        }
+                        showModalAlert(modalId, 'danger', response.message || 'Error updating product');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Edit product error:', xhr.responseText);
+                    let errorMsg = 'Error updating product';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMsg = response.message;
+                        }
+                        if (response.errors) {
+                            displayFormErrors(response.errors);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                    }
+                    showModalAlert(modalId, 'danger', errorMsg);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).text('Update Product');
+                }
+            });
+        });
+
+        // ============================================
+        // SELLER APPLICATION FORM SUBMISSION
+        // ============================================
+        $('#sellerApplicationForm').on('submit', function(e) {
+            e.preventDefault();
+            console.log('Seller application form submitted');
+            
+            const formData = new FormData(this);
+            const submitBtn = $('#submitApplicationBtn');
+            const spinner = $('#applicationSpinner');
+            
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+            clearFormErrors('sellerApplicationForm');
+            
+            $.ajax({
+                url: "{% url 'apply_seller' %}",
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    console.log('Seller application success:', response);
+                    if (response.success) {
+                        showModalAlert('sellerApplicationModal', 'success', response.message);
+                        setTimeout(function() {
+                            $('#sellerApplicationModal').modal('hide');
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        if (response.errors) {
+                            displayFormErrors(response.errors);
+                        }
+                        showModalAlert('sellerApplicationModal', 'danger', response.message || 'An error occurred');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Seller application error:', status, error);
+                    console.error('Response:', xhr.responseText);
+                    
+                    let errorMsg = 'An error occurred while processing your request';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMsg = response.message;
+                        }
+                        if (response.errors) {
+                            displayFormErrors(response.errors);
+                            errorMsg = 'Please correct the errors below';
+                        }
+                    } catch (e) {
+                        errorMsg = 'Server error: ' + xhr.status + ' - ' + error;
+                    }
+                    
+                    showModalAlert('sellerApplicationModal', 'danger', errorMsg);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                }
+            });
+        });
+
+        // ============================================
+        // PREVIEW ID PICTURE
+        // ============================================
+        $('#id_id_picture').change(function() {
+            var file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    $(this).val('');
+                    return;
+                }
+                
+                var validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (validTypes.indexOf(file.type) === -1) {
+                    alert('Please upload a valid image file (JPG, PNG, GIF)');
+                    $(this).val('');
+                    return;
+                }
+                
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('.id-preview').remove();
+                    $('#id_id_picture').after(
+                        '<div class="id-preview mt-2 text-center">' +
+                        '<p>ID Preview:</p>' +
+                        '<img src="' + e.target.result + '" alt="ID Preview" class="img-thumbnail" style="max-height: 100px;">' +
+                        '</div>'
+                    );
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ============================================
+        // PREVIEW STORE LOGO
+        // ============================================
+        $('#store_logo').change(function() {
+            var file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    $(this).val('');
+                    return;
+                }
+                
+                var validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (validTypes.indexOf(file.type) === -1) {
+                    alert('Please upload a valid image file (JPG, PNG, GIF)');
+                    $(this).val('');
+                    return;
+                }
+                
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('.current-logo').removeClass('d-none');
+                    $('.current-logo img').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ============================================
+        // CLEAR FORM ON MODAL CLOSE
+        // ============================================
+        $('.modal').on('hidden.bs.modal', function() {
+            $(this).find('form')[0]?.reset();
+            $(this).find('.alert-container').empty();
+            $(this).find('.is-invalid').removeClass('is-invalid');
+            $(this).find('.invalid-feedback').text('').hide();
+            $(this).find('.image-preview img').addClass('d-none');
+        });
+    });
+</script>
+</body>
+</html>

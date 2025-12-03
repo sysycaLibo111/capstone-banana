@@ -1,0 +1,576 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BANAeScan</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+ <style>
+    :root {
+      --dark-brown: #2F1609;
+      --medium-brown: #704210;
+      --light-brown: #96500E;
+      --gold: #DA9408;
+      --light-gold: #FBD576;
+      --bright-gold: #FBD242;
+      --white: #FFFFFF;
+      --light-bg: #FFF9EC;
+      --card-shadow: 0 10px 40px rgba(47, 22, 9, 0.15);
+      --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--light-bg);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: url("{% static 'img/bc1.png' %}");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      padding: 40px 35px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(251, 213, 118, 0.4);
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(to right, var(--gold), var(--bright-gold));
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--bright-gold);
+      object-fit: cover;
+      box-shadow: 0 6px 20px rgba(218, 148, 8, 0.25);
+      transition: var(--transition);
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(218, 148, 8, 0.4);
+    }
+
+    .form-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--medium-brown);
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+      letter-spacing: -0.5px;
+    }
+
+    .form-title::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 4px;
+      background: linear-gradient(to right, var(--gold), var(--bright-gold));
+      border-radius: 4px;
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 16px 52px 16px 20px;
+      font-size: 16px;
+      border: 2px solid rgba(112, 66, 16, 0.15);
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.9);
+      transition: var(--transition);
+      color: var(--dark-brown);
+      font-weight: 500;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.2);
+      outline: none;
+      transform: translateY(-2px);
+    }
+
+    .input-group input::placeholder {
+      color: rgba(112, 66, 16, 0.5);
+    }
+
+    .input-group i {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 17px;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      color: var(--white);
+      background: linear-gradient(135deg, var(--gold), var(--bright-gold));
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      box-shadow: 0 6px 20px rgba(218, 148, 8, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.7s;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(218, 148, 8, 0.4);
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:active {
+      transform: translateY(-1px);
+    }
+
+    .forgot-password {
+      display: block;
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 25px;
+      color: var(--light-brown);
+      font-size: 15px;
+      text-decoration: none;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .forgot-password:hover {
+      color: var(--gold);
+      text-decoration: underline;
+    }
+
+    .separator {
+      display: flex;
+      align-items: center;
+      margin: 30px 0;
+      color: var(--medium-brown);
+    }
+
+    .separator::before,
+    .separator::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .separator span {
+      padding: 0 15px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .signup-text {
+      text-align: center;
+      color: var(--medium-brown);
+      margin-top: 25px;
+      font-size: 16px;
+    }
+
+    .signup-text a {
+      color: var(--gold);
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .signup-text a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s;
+    }
+
+    .signup-text a:hover {
+      color: var(--light-brown);
+    }
+
+    .signup-text a:hover::after {
+      width: 100%;
+    }
+
+    .language-selector {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .language-selector select {
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--gold);
+      background-color: var(--white);
+      color: var(--medium-brown);
+      font-size: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .language-selector select:hover {
+      border-color: var(--light-brown);
+      box-shadow: 0 2px 8px rgba(112, 66, 16, 0.1);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--medium-brown);
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 10;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      color: var(--gold);
+      background-color: rgba(218, 148, 8, 0.1);
+    }
+
+    .message-container {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 15px;
+      margin-bottom: 10px;
+      padding: 12px 16px;
+      background-color: rgba(220, 53, 69, 0.1);
+      border-radius: 10px;
+      border-left: 4px solid #dc3545;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .info-message {
+      color: #28a745;
+      font-size: 15px;
+      margin-bottom: 10px;
+      padding: 12px 16px;
+      background-color: rgba(40, 167, 69, 0.1);
+      border-radius: 10px;
+      border-left: 4px solid #28a745;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    /* Mobile-first responsive design */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+        background-attachment: scroll;
+      }
+      
+      .login-container {
+        padding: 35px 25px;
+        border-radius: 18px;
+      }
+      
+      .form-title {
+        font-size: 28px;
+      }
+      
+      .logo {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .input-group input,
+      .input-group select {
+        padding: 14px 48px 14px 18px;
+      }
+      
+      .btn {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 30px 20px;
+        border-radius: 16px;
+      }
+      
+      .form-title {
+        font-size: 26px;
+        margin-bottom: 25px;
+      }
+      
+      .logo {
+        width: 90px;
+        height: 90px;
+      }
+      
+      .input-group {
+        margin-bottom: 20px;
+      }
+      
+      .input-group input,
+      .input-group select {
+        padding: 13px 44px 13px 16px;
+        font-size: 15px;
+      }
+      
+      .btn {
+        padding: 15px;
+        font-size: 17px;
+      }
+      
+      .close-btn {
+        top: 15px;
+        left: 15px;
+        width: 36px;
+        height: 36px;
+      }
+      
+      .language-selector {
+        top: 15px;
+        right: 15px;
+      }
+      
+      .forgot-password {
+        font-size: 14px;
+      }
+      
+      .signup-text {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .login-container {
+        padding: 25px 18px;
+      }
+      
+      .form-title {
+        font-size: 24px;
+      }
+      
+      .logo {
+        width: 80px;
+        height: 80px;
+      }
+      
+      .input-group input,
+      .input-group select {
+        padding: 12px 40px 12px 14px;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .login-container {
+        background: white;
+        border: 2px solid var(--dark-brown);
+      }
+      
+      .input-group input,
+      .input-group select {
+        border: 2px solid var(--dark-brown);
+      }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <button class="close-btn" onclick="window.location.href='{% url 'landing_page' %}'">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <div class="language-selector">
+      <select id="languageSelect" onchange="changeLanguage()">
+        <option value="en">English</option>
+        <option value="ph">Tagalog</option>
+      </select>
+    </div>
+
+    <div class="logo-container">
+      <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+    </div>
+
+    <h1 class="form-title">LOGIN</h1>
+
+    {% if messages %}
+      <div class="message-container">
+        {% for message in messages %} 
+          {% if message.tags == 'error' %}
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i> {{ message }}
+            </div>
+          {% else %}
+            <div class="info-message">
+              <i class="fas fa-check-circle"></i> {{ message }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="input-group"> <i class="fas fa-user"></i>
+        <input type="text" name="username" placeholder="Username" required>
+      </div>
+      
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+      
+      <div class="input-group">
+        <select name="role" required>
+          <option value="" disabled selected>Select Role</option>
+          <option value="Farmer">Farmer</option>
+          <option value="Market-entity">Market-entity</option>
+          <option value="Admin">Admin</option>
+        </select>
+      </div>
+
+      <a href="{% url 'forgot-password' %}" class="forgot-password">Forgot Password?</a>
+
+      <button type="submit" class="btn">LOGIN</button>
+
+      <div class="separator">
+        <span>OR</span>
+      </div>
+
+      <p class="signup-text" id="signup-text" data-signup-url="{% url 'signup_view' %}">
+        Don't have an account? <a href="{% url 'signup_view' %}">Sign Up Now</a>
+      </p>
+    </form>
+  </div>
+
+  <script>
+    function changeLanguage() {
+      const lang = document.getElementById('languageSelect').value;
+      if (lang === 'ph') {
+        document.querySelector('.form-title').innerText = 'MAG-LOGIN';
+        document.querySelector('input[name="username"]').placeholder = 'Pangalan ng Gumagamit';
+        document.querySelector('input[name="password"]').placeholder = 'Password';
+        document.querySelector('select[name="role"] option[value=""]').textContent = 'Pumili ng Papel';
+        document.querySelector('.forgot-password').innerText = 'Nakalimutan ang Password?';
+        document.querySelector('.btn').innerText = 'MAG-LOGIN';
+        const signupURL = document.getElementById('signup-text').getAttribute('data-signup-url');
+        document.querySelector('#signup-text').innerHTML = 'Walang account? <a href="' + signupURL + '">Mag-sign up ngayon</a>';
+        document.querySelector('.separator span').innerText = 'O';
+      } else {
+        document.querySelector('.form-title').innerText = 'LOGIN';
+        document.querySelector('input[name="username"]').placeholder = 'Username';
+        document.querySelector('input[name="password"]').placeholder = 'Password';
+        document.querySelector('select[name="role"] option[value=""]').textContent = 'Select Role';
+        document.querySelector('.forgot-password').innerText = 'Forgot Password?';
+        document.querySelector('.btn').innerText = 'LOGIN';
+        const signupURL = document.getElementById('signup-text').getAttribute('data-signup-url');
+        document.querySelector('#signup-text').innerHTML = 'Don\'t have an account? <a href="' + signupURL + '">Sign Up Now</a>';
+        document.querySelector('.separator span').innerText = 'OR';
+      }
+    }
+  </script>
+</body>
+</html

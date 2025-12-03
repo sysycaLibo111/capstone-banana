@@ -1,0 +1,1409 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+    <title>Overview My Orders - {{ request.user.username }}</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --success-green: #28a745;
+            --pending: #F59E0B;
+            --processing: #3B82F6;
+            --delivered: #8B5CF6;
+            --completed: #10B981;
+            --cancelled: #EF4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        nav.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(251, 210, 66, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bright-gold);
+        }
+
+        nav .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            margin-top: 20px;
+        }
+
+        nav .menu a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        nav .menu a:hover {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a i {
+            width: 24px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        /* Navbar Styles */
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            margin: 0;
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        /* Date Filters */
+        .date-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-filters input, 
+        .date-filters select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--gold);
+            border-color: var(--gold);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--light-brown);
+            border-color: var(--light-brown);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--gold);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .right_side_process{
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .settings-icon{
+            font-size: 24px;
+        }
+
+        /* Settings dropdown */
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 220px;
+            overflow: hidden;
+        }
+
+        .settings-dropdown a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--medium-brown);
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(218, 148, 8, 0.1);
+        }
+
+        .settings-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .settings-dropdown a:hover {
+            background-color: rgba(218, 148, 8, 0.1);
+            padding-left: 25px;
+            color: var(--gold);
+        }
+
+        .settings-dropdown a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .settings-icon {
+            position: relative;
+        }
+
+        .settings-icon:hover .settings-dropdown {
+            display: block;
+        }
+
+        /* Main Content Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .dashboard-section {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--medium-brown);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tables Styles */
+        .order-table, .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .order-table th, .customer-table th {
+            background-color: var(--gold);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .order-table td, .customer-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .order-table tr:hover, .customer-table tr:hover {
+            background-color: rgba(218, 148, 8, 0.05);
+        }
+
+        .order-table img, .customer-table img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        /* Scrollable Table Body */
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        /* Status Badges */
+        .status-pending {
+            background-color: var(--pending);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-processing {
+            background-color: var(--processing);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-delivered {
+            background-color: var(--delivered);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: var(--completed);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-cancelled {
+            background-color: var(--cancelled);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Cards for Order Summary */
+        .summary-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--gold);
+            position: relative;
+        }
+
+        .summary-card h5 {
+            color: var(--medium-brown);
+            margin-bottom: 10px;
+        }
+
+        .summary-card p {
+            margin: 5px 0;
+            padding-right: 100px;
+            position: relative;
+        }
+
+        .summary-card .status-badge {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .summary-card .review-btn {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+        }
+
+        .total-expenses {
+            background-color: var(--success-green);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* My Store Filter */
+        .store-filter {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        /* Calendar Styles */
+        .calendar-wrapper {
+            margin-top: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            background: #ffffff;
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 10px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-cell {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 80px;
+            padding: 4px;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .calendar-date {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stacked-bar {
+            display: flex;
+            height: 8px;
+            width: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .bar-segment {
+            height: 100%;
+        }
+
+        /* Calendar Navigation */
+        .calendar-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav-btn {
+            background: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .calendar-nav-btn:hover {
+            background: var(--light-brown);
+        }
+
+        /* Progress Bars */
+        .progress-bars {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .progress-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .progress-bar-item:hover {
+            background: #e9ecef;
+        }
+
+        .progress-bar-item.active {
+            background: #e9ecef;
+            box-shadow: 0 0 0 2px var(--gold);
+        }
+
+        .progress-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .progress-color.pending { background-color: var(--pending); }
+        .progress-color.processing { background-color: var(--processing); }
+        .progress-color.delivered { background-color: var(--delivered); }
+        .progress-color.completed { background-color: var(--completed); }
+
+        /* Calendar cell status indicators */
+        .calendar-cell.has-orders {
+            background-color: #FFF9EC;
+            border-color: var(--gold);
+        }
+
+        .calendar-cell.has-orders:hover {
+            background-color: var(--light-gold);
+        }
+
+        .calendar-cell .date {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 12px;
+            color: #374151 !important;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .calendar-cell.other-month {
+            background: #ffffff;
+            color: #9ca3af;
+        }
+
+        /* Star Rating Styles */
+        .star-rating {
+            display: inline-flex;
+            direction: rtl;
+            unicode-bidi: bidi-override;
+        }
+        
+        .star-rating input {
+            display: none;
+        }
+        
+        .star-rating label {
+            color: #ddd;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: var(--gold);
+        }
+        
+        .star-rating-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .mystore, .mystore * {
+                visibility: visible;
+            }
+            .mystore {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Enhanced Progress Bar */
+        .progress-bar-filter {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-segment {
+            flex: 1;
+            text-align: center;
+            padding: 10px 5px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-segment:hover {
+            transform: translateY(-2px);
+        }
+        
+        .progress-segment.active {
+            box-shadow: 0 0 0 2px var(--gold);
+        }
+        
+        .progress-segment.pending { background-color: var(--pending); color: white; }
+        .progress-segment.processing { background-color: var(--processing); color: white; }
+        .progress-segment.delivered { background-color: var(--delivered); color: white; }
+        .progress-segment.completed { background-color: var(--completed); color: white; }
+        .progress-segment.cancelled { background-color: var(--cancelled); color: white; }
+        .progress-segment.all { 
+            background: linear-gradient(to right, var(--pending), var(--processing), var(--delivered), var(--completed));
+            color: white;
+        }
+        
+        /* Calendar status indicators */
+        .calendar-cell.pending-highlight { background-color: rgba(245, 158, 11, 0.2); }
+        .calendar-cell.processing-highlight { background-color: rgba(59, 130, 246, 0.2); }
+        .calendar-cell.delivered-highlight { background-color: rgba(139, 92, 246, 0.2); }
+        .calendar-cell.completed-highlight { background-color: rgba(16, 185, 129, 0.2); }
+        .calendar-cell.cancelled-highlight { background-color: rgba(239, 68, 68, 0.2); }
+        
+        /* Settings button */
+        .settings-button {
+            background: none;
+            border: none;
+            color: var(--medium-brown);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .settings-button:hover {
+            background-color: rgba(218, 148, 8, 0.1);
+            color: var(--gold);
+        }
+        
+        /* Filter controls */
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            nav.sidebar {
+                width: 240px;
+            }
+            .content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-table th, .customer-table th,
+            .order-table td, .customer-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .modal-content {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav.sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            nav.sidebar.active {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+            }
+            .burger {
+                display: block;
+            }
+            .nav-bar {
+                padding: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .date-filters {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .date-filters input, 
+            .date-filters select {
+                width: 100%;
+            }
+            .right_side_process {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .progress-bars {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .order-table, .customer-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            .order-table th, .customer-table th,
+            .order-table td, .customer-table td {
+                font-size: 13px;
+            }
+            .order-table img, .customer-table img {
+                width: 40px;
+                height: 40px;
+            }
+            select {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .nav-bar p {
+                font-size: 22px;
+            }
+            .btn {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'marketplace_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'market_place' %}" ><i class="fas fa-store-alt"></i> MarketPlace</a>
+            <a href="{% url 'my_orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+        <div class="burger" id="burger" onclick="toggleNav()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </nav>
+    <div class="content">
+        <div class="nav-bar">
+            <h2 class="page-title">ORDERS MANAGEMENT</h2>
+            <div class="right_side_process">
+                <div class="settings-icon" id="settings-icon">
+                    <i class="fas fa-cog"></i>
+                    <div class="settings-dropdown">
+                        <a href="" class="settings-item"><i class="fas fa-user"></i> Profile</a>
+                        <a href="" class="settings-item"><i class="fas fa-map-marker-alt"></i> Address Details</a>
+                        <a href="" class="settings-item"><i class="fas fa-map"></i> Location Mapping</a>
+                        <div class="dropdown-footer">
+                            <a href="{% url 'logout' %}" class="settings-item" style="color: #EF4444;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-container">
+            <!-- Left Column - Admin Order History -->
+            <div class="dashboard-section">
+                <div class="section-title">
+                    <span>My Order History</span>
+                    <button class="settings-button no-print" onclick="showSettings('order-history')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+                
+                <!-- Pending Orders Card -->
+                <div class="summary-card">
+                    <h5>Pending Orders</h5>
+                    {% for order in new_orders %}
+                        <p>
+                            <strong>{{ order.product.name }}</strong> - 
+                            {{ order.quantity }} x ₱{{ order.product.price }}
+                            <strong>₱{{ order.total_amount }}</strong>
+                            <span class="status-pending status-badge">Pending</span>
+                        </p>
+                    {% empty %}
+                        <p>No pending orders</p>
+                    {% endfor %}
+                </div>
+                
+                <!-- Completed Orders Card -->
+                <div class="summary-card">
+                    <h5>Completed Orders</h5>
+                    {% for order in total_orders %}
+                        {% if order.status == 'Completed' %}
+                        <p>
+                            <strong>{{ order.product.name }}</strong> - 
+                            {{ order.quantity }} × ₱{{ order.product.price }} = 
+                            <strong>₱{{ order.total_amount }}</strong>
+                            <span class="status-completed status-badge">Completed</span>
+                            
+                            <!-- Star Rating for Completed Orders -->
+                            {% if not order.has_review %}
+                            <div class="star-rating-container">
+                                <span>Rate: </span>
+                                <div class="star-rating">
+                                    <input type="radio" id="star5-{{ order.id }}" name="rating-{{ order.id }}" value="5" />
+                                    <label for="star5-{{ order.id }}" title="5 stars">★</label>
+                                    <input type="radio" id="star4-{{ order.id }}" name="rating-{{ order.id }}" value="4" />
+                                    <label for="star4-{{ order.id }}" title="4 stars">★</label>
+                                    <input type="radio" id="star3-{{ order.id }}" name="rating-{{ order.id }}" value="3" />
+                                    <label for="star3-{{ order.id }}" title="3 stars">★</label>
+                                    <input type="radio" id="star2-{{ order.id }}" name="rating-{{ order.id }}" value="2" />
+                                    <label for="star2-{{ order.id }}" title="2 stars">★</label>
+                                    <input type="radio" id="star1-{{ order.id }}" name="rating-{{ order.id }}" value="1" />
+                                    <label for="star1-{{ order.id }}" title="1 star">★</label>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="submitReview({{ order.id }}, {{ order.product.id }})">
+                                    Submit
+                                </button>
+                            </div>
+                            {% else %}
+                                <div class="text-muted">Reviewed</div>
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                    {% empty %}
+                        <p>No completed orders</p>
+                    {% endfor %}
+                    
+                    <!-- Total Expenses -->
+                    <div class="total-expenses">
+                        Total Expenses: ₱{{ total_expenses|default:"0.00" }}
+                    </div>
+                </div>
+            </div>
+            
+    <script>
+        // Global variables for calendar
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let currentStatusFilter = 'all';
+        let currentDateFilter = null;
+        let currentMonthFilter = null;
+        let currentYearFilter = null;
+        let calendarData = {};
+        let allOrders = [];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize calendar
+            renderCalendar();
+            
+            // Initialize star rating
+            initStarRating();
+            
+            // Initialize settings dropdown
+            initSettingsDropdown();
+            
+            // Initialize table scrolling
+            initTableScrolling();
+            
+            // Store all orders for filtering
+            allOrders = Array.from(document.querySelectorAll('#storeOrdersTable tbody tr'));
+            
+            // Initialize date picker
+            flatpickr("#storeDateFilter", {
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr, instance) {
+                    applyStoreDateFilter();
+                }
+            });
+        });
+
+        // Calendar functionality
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+            
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add empty cells for days before first day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-cell empty';
+                calendarGrid.appendChild(emptyCell);
+            }
+            
+            // Add cells for each day
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                cell.setAttribute('data-date', dateStr);
+                
+                // Add date number
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'date';
+                dateSpan.textContent = day;
+                cell.appendChild(dateSpan);
+                
+                // Check if this date has orders
+                const orderCount = getOrderCountForDate(dateStr);
+                if (orderCount > 0) {
+                    cell.classList.add('has-orders');
+                    
+                    // Add status indicators
+                    const statusData = getStatusDataForDate(dateStr);
+                    for (const status in statusData) {
+                        if (statusData[status] > 0) {
+                            cell.classList.add(`${status}-highlight`);
+                        }
+                    }
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'order-count';
+                    countSpan.textContent = orderCount;
+                    cell.appendChild(countSpan);
+                    cell.onclick = () => filterOrdersByDate(dateStr);
+                }
+                
+                calendarGrid.appendChild(cell);
+            }
+            
+            // Update month/year display
+            document.getElementById('calendar-month-year').textContent = 
+                new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' }) + ' ' + currentYear;
+        }
+
+        function changeCalendarMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+            applyCalendarFilters();
+        }
+
+        function getOrderCountForDate(dateStr) {
+            // This would be replaced with actual data from your backend
+            // For demo purposes, we'll use a random number
+            return Math.floor(Math.random() * 5);
+        }
+
+        function getStatusDataForDate(dateStr) {
+            // This would be replaced with actual data from your backend
+            return {
+                pending: Math.floor(Math.random() * 3),
+                processing: Math.floor(Math.random() * 3),
+                delivered: Math.floor(Math.random() * 3),
+                completed: Math.floor(Math.random() * 3),
+                cancelled: Math.floor(Math.random() * 3)
+            };
+        }
+
+        function filterOrdersByDate(dateStr) {
+            // Apply date filter to both table and calendar
+            currentDateFilter = dateStr;
+            currentMonthFilter = null;
+            currentYearFilter = null;
+            
+            document.getElementById('storeFilterType').value = 'date';
+            document.getElementById('storeDateFilter').value = dateStr;
+            toggleStoreFilters();
+            
+            applyStoreFilters();
+            highlightCalendarDate(dateStr);
+        }
+
+        function highlightCalendarDate(dateStr) {
+            // Remove previous highlights
+            document.querySelectorAll('.calendar-cell').forEach(cell => {
+                cell.classList.remove('selected-date');
+            });
+            
+            // Highlight selected date
+            const targetCell = document.querySelector(`.calendar-cell[data-date="${dateStr}"]`);
+            if (targetCell) {
+                targetCell.classList.add('selected-date');
+            }
+        }
+
+        function filterByStatus(status) {
+            currentStatusFilter = status;
+            
+            // Update active state of progress bars
+            document.querySelectorAll('.progress-segment').forEach(item => {
+                if (item.getAttribute('data-status') === status) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Apply filters to both table and calendar
+            applyStoreFilters();
+            applyCalendarFilters();
+        }
+
+        function applyStoreFilters() {
+            const rows = allOrders;
+            
+            rows.forEach(row => {
+                let showRow = true;
+                
+                // Apply status filter
+                if (currentStatusFilter !== 'all' && row.getAttribute('data-status') !== currentStatusFilter) {
+                    showRow = false;
+                }
+                
+                // Apply date filter
+                if (currentDateFilter) {
+                    const rowDate = row.getAttribute('data-date');
+                    if (rowDate !== currentDateFilter) {
+                        showRow = false;
+                    }
+                }
+                
+                // Apply month filter
+                if (currentMonthFilter) {
+                    const rowDate = new Date(row.getAttribute('data-date'));
+                    if (rowDate.getMonth() + 1 !== parseInt(currentMonthFilter)) {
+                        showRow = false;
+                    }
+                }
+                
+                // Apply year filter
+                if (currentYearFilter) {
+                    const rowDate = new Date(row.getAttribute('data-date'));
+                    if (rowDate.getFullYear() !== parseInt(currentYearFilter)) {
+                        showRow = false;
+                    }
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        function applyCalendarFilters() {
+            // This would update the calendar based on current filters
+            // In a real implementation, you would fetch filtered data from the server
+            console.log('Applying calendar filters:', {
+                status: currentStatusFilter,
+                date: currentDateFilter,
+                month: currentMonthFilter,
+                year: currentYearFilter
+            });
+        }
+
+        // Store filter functions
+        function toggleStoreFilters() {
+            const filterType = document.getElementById('storeFilterType').value;
+            
+            // Hide all filter containers
+            document.getElementById('dateFilterContainer').style.display = 'none';
+            document.getElementById('monthFilterContainer').style.display = 'none';
+            document.getElementById('yearFilterContainer').style.display = 'none';
+            
+            // Reset filters
+            currentDateFilter = null;
+            currentMonthFilter = null;
+            currentYearFilter = null;
+            
+            // Show selected filter container
+            if (filterType === 'date') {
+                document.getElementById('dateFilterContainer').style.display = 'block';
+            } else if (filterType === 'month') {
+                document.getElementById('monthFilterContainer').style.display = 'block';
+            } else if (filterType === 'year') {
+                document.getElementById('yearFilterContainer').style.display = 'block';
+            } else if (filterType === 'all') {
+                // Show all rows
+                applyStoreFilters();
+            }
+        }
+
+        function applyStoreDateFilter() {
+            currentDateFilter = document.getElementById('storeDateFilter').value;
+            currentMonthFilter = null;
+            currentYearFilter = null;
+            applyStoreFilters();
+            applyCalendarFilters();
+        }
+
+        function applyStoreMonthFilter() {
+            currentMonthFilter = document.getElementById('storeMonthFilter').value;
+            currentDateFilter = null;
+            currentYearFilter = null;
+            applyStoreFilters();
+            applyCalendarFilters();
+        }
+
+        function applyStoreYearFilter() {
+            currentYearFilter = document.getElementById('storeYearFilter').value;
+            currentDateFilter = null;
+            currentMonthFilter = null;
+            applyStoreFilters();
+            applyCalendarFilters();
+        }
+
+        // Print function
+        function printFilteredData() {
+            window.print();
+        }
+
+        // Order status change handler
+        function handleStatusChange(selectEl, orderId) {
+            const status = selectEl.value;
+
+            // Open modal immediately if needed
+            if (status === "On Process") {
+                showScheduleModal(orderId, "process");
+            } else if (status === "Delivered") {
+                showScheduleModal(orderId, "delivery");
+            } else if (status === "Completed") {
+                showScheduleModal(orderId, "completion");
+            }
+
+            // Then submit status change (AJAX in background)
+            fetch(selectEl.form.action, {
+                method: "POST",
+                body: new FormData(selectEl.form),
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            }).then(response => {
+                if (response.ok) {
+                    // Reload the page to see updated status
+                    location.reload();
+                }
+            }).catch(err => console.error("Status update failed:", err));
+        }
+
+        function showScheduleModal(orderId, type) {
+            document.getElementById("scheduleOrderId").value = orderId;
+            document.getElementById("scheduleType").value = type;
+
+            if (type === "completion") {
+                document.getElementById("dateRangeFields").style.display = "none";
+                document.getElementById("singleDateField").style.display = "block";
+            } else {
+                document.getElementById("dateRangeFields").style.display = "block";
+                document.getElementById("singleDateField").style.display = "none";
+            }
+
+            // Show the modal
+            let modalEl = document.getElementById("scheduleModal");
+            let modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        // Review submission function
+        function submitReview(orderId, productId) {
+            const ratingInput = document.querySelector(`input[name="rating-${orderId}"]:checked`);
+            
+            if (!ratingInput) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            const rating = ratingInput.value;
+            
+            // Submit review via AJAX
+            fetch("{% url 'add_review' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": getCookie('csrftoken')
+                },
+                body: `order_id=${orderId}&product_id=${productId}&rating=${rating}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Review submitted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error submitting review');
+                }
+            })
+            .catch(err => console.error("Review submission failed:", err));
+        }
+
+        // Star rating functionality
+        function initStarRating() {
+            // This is handled by the CSS-only star rating system
+        }
+
+        // Settings functionality
+        function showSettings(section) {
+            const modalBody = document.getElementById('settingsModalBody');
+            let settingsContent = '';
+            
+            if (section === 'order-history') {
+                settingsContent = `
+                    <h6>Order History Settings</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="showPendingOrders" checked>
+                        <label class="form-check-label" for="showPendingOrders">
+                            Show Pending Orders
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="showCompletedOrders" checked>
+                        <label class="form-check-label" for="showCompletedOrders">
+                            Show Completed Orders
+                        </label>
+                    </div>
+                `;
+            } else if (section === 'store-filters') {
+                settingsContent = `
+                    <h6>Store Filter Settings</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberFilters" checked>
+                        <label class="form-check-label" for="rememberFilters">
+                            Remember Filter Settings
+                        </label>
+                    </div>
+                `;
+            } else if (section === 'calendar') {
+                settingsContent = `
+                    <h6>Calendar Settings</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Default View</label>
+                        <select class="form-select" id="defaultCalendarView">
+                            <option value="month" selected>Month View</option>
+                            <option value="week">Week View</option>
+                        </select>
+                    </div>
+                `;
+            }
+            
+            modalBody.innerHTML = settingsContent;
+            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            settingsModal.show();
+        }
+
+        // Utility function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Settings dropdown functionality
+        function initSettingsDropdown() {
+            const settingsIcon = document.getElementById('settings-icon');
+            settingsIcon.addEventListener('mouseenter', function() {
+                document.querySelector('.settings-dropdown').style.display = 'block';
+            });
+            settingsIcon.addEventListener('mouseleave', function() {
+                document.querySelector('.settings-dropdown').style.display = 'none';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const settingsIcon = document.getElementById('settings-icon');
+                const dropdown = document.querySelector('.settings-dropdown');
+                
+                if (!settingsIcon.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+
+        // Table scrolling functionality
+        function initTableScrolling() {
+            const tableScrolls = document.querySelectorAll('.table-scroll');
+            tableScrolls.forEach(tableScroll => {
+                tableScroll.addEventListener('scroll', function() {
+                    const thead = this.querySelector('thead');
+                    if (this.scrollTop > 0) {
+                        thead.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                    } else {
+                        thead.style.boxShadow = 'none';
+                    }
+                });
+            });
+        }
+
+        // Toggle sidebar navigation
+        function toggleNav() {
+            const sidebar = document.querySelector('nav.sidebar');
+            const burger = document.getElementById('burger');
+            sidebar.classList.toggle('active');
+            burger.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

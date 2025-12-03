@@ -1,0 +1,1201 @@
+{% extends 'Fnavbase.html' %}
+{% load static %}
+
+{% block title %}BANAeScan - Farmer Dashboard{% endblock %}
+
+{% block navbar_title %}Scan Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard Header */
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        color: var(--dark-green);
+        margin-bottom: 10px;
+    }
+
+    .dashboard-subtitle {
+        color: var(--light-brown);
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .data-updated {
+        font-size: 0.9rem;
+        color: var(--light-brown);
+    }
+
+    /* Weather Widget */
+    .weather-widget {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .weather-icon {
+        font-size: 3rem;
+        margin-right: 20px;
+    }
+
+    .weather-info {
+        flex: 1;
+    }
+
+    .weather-info h3 {
+        margin-bottom: 5px;
+    }
+
+    .weather-details {
+        display: flex;
+        gap: 20px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+
+    .temperature {
+        font-size: 3rem;
+        font-weight: bold;
+    }
+
+    /* Scanning Tip */
+    .scanning-tip {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--light-brown) 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .scanning-tip i {
+        font-size: 1.5rem;
+        color: #fff3cd;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .kpi-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--dark-green) 100%);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .kpi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .kpi-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .kpi-icon.total { background: var(--primary); }
+    .kpi-icon.disease { background: var(--danger); }
+    .kpi-icon.variety { background: var(--success); }
+    .kpi-icon.today { background: var(--info); }
+    .kpi-icon.week { background: var(--warning); }
+    .kpi-icon.month { background: var(--light-brown); }
+
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--dark-green);
+        margin-bottom: 5px;
+    }
+
+    .kpi-label {
+        color: var(--light-brown);
+        font-weight: 500;
+    }
+
+    /* Analytics Grid */
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .analytics-section {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: var(--dark-green);
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 15px;
+    }
+
+    .chart-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .tab-btn {
+        padding: 8px 16px;
+        border: 1px solid var(--primary);
+        background: white;
+        color: var(--primary);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .tab-btn.active,
+    .tab-btn:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+
+    .chart-legend {
+        margin-top: 15px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+    }
+
+    /* Button */
+    .history {
+        display: flex;
+        gap: 15px;
+        margin-left: 50px;
+    }
+
+    .history a {
+        padding: 8px 16px;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .history a:hover {
+        background: var(--dark-green);
+        transform: translateY(-2px);
+    }
+
+    /* Recent Scan Records */
+    .scan-records {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .records-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .record-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .record-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .record-type {
+        padding: 4px 12px;
+        border-radius: 15px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .record-type.disease {
+        background: var(--danger);
+    }
+
+    .record-type.variety {
+        background: var(--success);
+    }
+
+    .confidence-text {
+        font-weight: bold;
+        color: var(--primary);
+    }
+
+    .record-content {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .record-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .record-details {
+        flex: 1;
+    }
+
+    .record-details h4 {
+        color: var(--dark-green);
+        margin-bottom: 8px;
+    }
+
+    .confidence-section {
+        margin-bottom: 8px;
+    }
+
+    .confidence-bar {
+        background: #e9ecef;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--danger) 0%, var(--warning) 50%, var(--success) 100%);
+        transition: width 0.3s ease;
+    }
+
+    .record-timestamp {
+        font-size: 0.8rem;
+        color: var(--light-brown);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Information Cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary);
+    }
+
+    .info-card h4 {
+        color: var(--dark-green);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-card p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .info-tag {
+        display: inline-block;
+        background: var(--light);
+        color: var(--primary);
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin-right: 8px;
+        margin-top: 5px;
+        border: 1px solid var(--primary);
+    }
+
+    /* Loading and Empty States */
+    .loading,
+    .empty-state,
+    .error-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--light-brown);
+    }
+
+    .loading i,
+    .empty-state i,
+    .error-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .error-state {
+        background: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    /* Mobile Responsiveness for Dashboard */
+    @media (max-width: 768px) {
+        .dashboard-title {
+            font-size: 2rem;
+        }
+        
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .analytics-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .analytics-section {
+            padding: 15px;
+        }
+        
+        .chart-container {
+            height: 250px;
+        }
+        
+        .records-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .history {
+            margin-left: 0;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-title {
+            font-size: 1.8rem;
+        }
+        
+        .kpi-value {
+            font-size: 2rem;
+        }
+        
+        .chart-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .weather-widget {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .weather-icon {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+        
+        .weather-details {
+            justify-content: center;
+        }
+        
+        .history {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .history a {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <h1 class="dashboard-title">My Scanning Dashboard</h1>
+    <p class="dashboard-subtitle">Track your banana disease and variety scanning activities</p>
+    <div class="data-updated" id="lastUpdated">Last updated: Just now</div>
+</div>
+
+<!-- Weather Widget -->
+<!-- <div class="weather-widget">
+    <div class="weather-icon">
+        <i class="{{ weather_data.weather_icon }}"></i>
+    </div>
+    <div class="weather-info">
+        <h3>{{ weather_data.location }}</h3>
+        <p>{{ weather_data.description }}</p>
+        <div class="weather-details">
+            <span>Humidity: {{ weather_data.humidity }}%</span>
+            <span>Wind: {{ weather_data.wind_speed }} m/s</span>
+            <span>Feels like: {{ weather_data.feels_like }}°C</span>
+        </div>
+    </div>
+    <div class="temperature">{{ weather_data.temperature }}°C</div>
+</div> -->
+
+<!-- Scanning Tip -->
+<div class="scanning-tip">
+    <i class="fas fa-lightbulb"></i>
+    <p>{{ scanning_tip }}</p>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon total">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="totalScans">{{ total_scan }}</div>
+        <div class="kpi-label">Total Scans</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon disease">
+                <i class="fas fa-virus"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="diseaseScans">{{ total_disease_scan }}</div>
+        <div class="kpi-label">Disease Scans</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon variety">
+                <i class="fas fa-seedling"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="varietyScans">{{ total_variety_scan }}</div>
+        <div class="kpi-label">Variety Scans</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon today">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="todayScans">{{ total_today_scan }}</div>
+        <div class="kpi-label">Today's Scans</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon week">
+                <i class="fas fa-calendar-week"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="weekScans">{{ total_week_scan }}</div>
+        <div class="kpi-label">This Week</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <div class="kpi-icon month">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+        </div>
+        <div class="kpi-value" id="monthScans">{{ total_month_scan }}</div>
+        <div class="kpi-label">This Month</div>
+    </div>
+</div>
+
+<!-- Analytics Grid -->
+<div class="analytics-grid">
+    <!-- Disease Analytics -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div class="section-title">
+                <div class="section-icon">
+                    <i class="fas fa-virus"></i>
+                </div>
+                Disease Analytics
+            </div>
+        </div>
+        
+        <div class="chart-tabs">
+            <button class="tab-btn active" onclick="showDiseaseChart('pie')">Pie Chart</button>
+            <button class="tab-btn" onclick="showDiseaseChart('bar')">Bar Chart</button>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="diseaseChart"></canvas>
+        </div>
+        <div id="diseaseStats" class="chart-legend"></div>
+    </div>
+
+    <!-- Variety Analytics -->
+    <div class="analytics-section">
+        <div class="section-header">
+            <div class="section-title">
+                <div class="section-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                Variety Analytics
+            </div>
+        </div>
+        
+        <div class="chart-tabs">
+            <button class="tab-btn active" onclick="showVarietyChart('pie')">Pie Chart</button>
+            <button class="tab-btn" onclick="showVarietyChart('bar')">Bar Chart</button>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="varietyChart"></canvas>
+        </div>
+        <div id="varietyStats" class="chart-legend"></div>
+    </div>
+</div>
+
+<!-- Scanning Trends -->
+<div class="analytics-section" style="margin-bottom: 30px;">
+    <div class="section-header">
+        <div class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            Scanning Trends (Last 30 Days)
+        </div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="trendsChart"></canvas>
+    </div>
+</div>
+
+<!-- Recent Scan Records -->
+<div class="scan-records">
+    <div class="section-header">
+        <div class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            Recent Scans
+            <!-- Button -->
+            <div class="history">
+                <a href="{% url 'disease_scan_history' %}">Disease History</a>
+                <a href="{% url 'variety_scan_history' %}">Variety History</a>
+            </div>
+        </div>
+        <div style="font-size: 14px; color: var(--light-brown);">
+            Showing latest records
+        </div>
+    </div>
+    
+    <div class="records-grid" id="recordsGrid">
+        {% for record in recent_records %}
+        <div class="record-card">
+            <div class="record-header">
+                <span class="record-type {{ record.model_type }}">{{ record.model_type }}</span>
+                <span class="confidence-text">{{ record.confidence }}%</span>
+            </div>
+            <div class="record-content">
+                <img src="{{ record.image_url }}" alt="Scan Image" class="record-image" 
+                     onerror="this.src='{% static 'img/default-plant.png' %}'">
+                <div class="record-details">
+                    <h4>{{ record.prediction|default:"Unknown" }}</h4>
+                    <div class="confidence-section">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: {{ record.confidence }}%"></div>
+                        </div>
+                    </div>
+                    <div class="record-timestamp">
+                        <i class="fas fa-clock"></i> {{ record.formatted_timestamp }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <p>No scan records found</p>
+            <p>Start scanning to see your results here!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Information Cards -->
+<div class="info-cards" id="infoCards">
+    <!-- Most Scanned Disease Info -->
+    {% if most_scanned.disease != 'None' %}
+    <div class="info-card">
+        <h4><i class="fas fa-virus" style="color: var(--danger);"></i> {{ most_scanned.disease }} (Most Scanned Disease)</h4>
+        <p><strong>Scanned:</strong> {{ most_scanned.disease_count }} times</p>
+        <p>This is your most frequently scanned disease. Understanding its patterns and management is crucial for effective crop protection.</p>
+    </div>
+    {% endif %}
+
+    <!-- Most Scanned Variety Info -->
+    {% if most_scanned.variety != 'None' %}
+    <div class="info-card">
+        <h4><i class="fas fa-seedling" style="color: var(--success);"></i> {{ most_scanned.variety }} (Most Scanned Variety)</h4>
+        <p><strong>Scanned:</strong> {{ most_scanned.variety_count }} times</p>
+        <p>This is your most frequently scanned variety. Knowing your varieties helps optimize farming practices and yield predictions.</p>
+    </div>
+    {% endif %}
+
+    <!-- Scanning Statistics -->
+    <div class="info-card">
+        <h4><i class="fas fa-chart-bar" style="color: var(--info);"></i> Scanning Statistics</h4>
+        <p><strong>Average Disease Confidence:</strong> {{ confidence_stats.disease_avg }}%</p>
+        <p><strong>Average Variety Confidence:</strong> {{ confidence_stats.variety_avg }}%</p>
+        <p><strong>High Confidence Scans:</strong> {{ confidence_stats.high_confidence_count }} (>80%)</p>
+        <p><strong>Low Confidence Scans:</strong> {{ confidence_stats.low_confidence_count }} (<60%)</p>
+        <span class="info-tag">Unique Diseases: {{ diversity_stats.unique_diseases }}</span>
+        <span class="info-tag">Unique Varieties: {{ diversity_stats.unique_varieties }}</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const UPDATE_INTERVAL = 30000;
+    // Global variables for charts and data
+    let diseaseChart, varietyChart, trendsChart;
+    let dashboardData = {
+        total_scans: {{ total_scan }},
+        disease_scans: {{ total_disease_scan }},
+        variety_scans: {{ total_variety_scan }},
+        today_scans: {{ total_today_scan }},
+        week_scans: {{ total_week_scan }},
+        month_scans: {{ total_month_scan }},
+        disease_analytics: {{ disease_analytics|safe }},
+        variety_analytics: {{ variety_analytics|safe }},
+        trends_data: {{ trends_data|safe }},
+        recent_records: {{ recent_records|safe }},
+        most_scanned: {{ most_scanned|safe }},
+        confidence_stats: {{ confidence_stats|safe }},
+        diversity_stats: {{ diversity_stats|safe }},
+        user_name: "{{ user_name }}"
+    };
+    let currentDiseaseChartType = 'pie';
+    let currentVarietyChartType = 'pie';
+
+    // Initialize dashboard on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard();
+        updateDateTime();
+        setInterval(updateDateTime, 60000); // Update time every minute
+    });
+
+    // Update date and time display
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+    }
+
+    function initializeDashboard() {
+        initializeCharts();
+        updateLastUpdatedTime();
+    }
+
+    function updateLastUpdatedTime() {
+        const now = new Date();
+        document.getElementById('lastUpdated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+    }
+
+    // Initialize all charts
+    function initializeCharts() {
+        createDiseaseChart();
+        createVarietyChart();
+        createTrendsChart();
+    }
+
+    // Create disease analytics chart
+    function createDiseaseChart(type = 'pie') {
+        const ctx = document.getElementById('diseaseChart').getContext('2d');
+        
+        if (diseaseChart) {
+            diseaseChart.destroy();
+        }
+
+        const diseaseData = dashboardData.disease_analytics || {};
+        const labels = Object.keys(diseaseData);
+        const values = Object.values(diseaseData);
+        const colors = ['#dc3545', '#fd7e14', '#ffc107', '#20c997', '#6f42c1'];
+
+        // Update chart type buttons
+        updateChartTabs('disease', type);
+        currentDiseaseChartType = type;
+
+        if (labels.length === 0) {
+            showEmptyChart('diseaseChart', 'No disease scan data available');
+            document.getElementById('diseaseStats').innerHTML = '<p style="text-align: center; color: var(--light-brown);">No data to display</p>';
+            return;
+        }
+
+        diseaseChart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverOffset: type === 'pie' ? 10 : 0
+                }]
+            },
+            options: getChartOptions(type, 'disease')
+        });
+
+        updateStatsDisplay('diseaseStats', diseaseData, colors);
+    }
+
+    // Create variety analytics chart
+    function createVarietyChart(type = 'pie') {
+        const ctx = document.getElementById('varietyChart').getContext('2d');
+        
+        if (varietyChart) {
+            varietyChart.destroy();
+        }
+
+        const varietyData = dashboardData.variety_analytics || {};
+        const labels = Object.keys(varietyData);
+        const values = Object.values(varietyData);
+        const colors = ['#28a745', '#17a2b8', '#6610f2', '#e83e8c', '#fd7e14'];
+
+        // Update chart type buttons
+        updateChartTabs('variety', type);
+        currentVarietyChartType = type;
+
+        if (labels.length === 0) {
+            showEmptyChart('varietyChart', 'No variety scan data available');
+            document.getElementById('varietyStats').innerHTML = '<p style="text-align: center; color: var(--light-brown);">No data to display</p>';
+            return;
+        }
+
+        varietyChart = new Chart(ctx, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverOffset: type === 'pie' ? 10 : 0
+                }]
+            },
+            options: getChartOptions(type, 'variety')
+        });
+
+        updateStatsDisplay('varietyStats', varietyData, colors);
+    }
+
+    function updateStatsDisplay(elementId, data, colors) {
+        const element = document.getElementById(elementId);
+        const total = Object.values(data).reduce((sum, val) => sum + val, 0);
+        
+        let html = '';
+        Object.entries(data).forEach(([label, count], index) => {
+            const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+            html += `
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: ${colors[index]}"></div>
+                    <span>${label}: ${count} (${percentage}%)</span>
+                </div>
+            `;
+        });
+        
+        element.innerHTML = html;
+    }
+
+    function showEmptyChart(canvasId, message) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.font = '16px Segoe UI';
+        ctx.fillStyle = '#96500E';
+        ctx.textAlign = 'center';
+        ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
+    }
+
+    function updateChartTabs(chartType, activeType) {
+        const tabs = document.querySelectorAll(`[onclick*="${chartType}Chart"]`);
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.onclick.toString().includes(`'${activeType}'`)) {
+                tab.classList.add('active');
+            }
+        });
+    }
+
+    // Create trends chart
+    function createTrendsChart() {
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        
+        if (trendsChart) {
+            trendsChart.destroy();
+        }
+
+        const trendsData = dashboardData.trends_data || {};
+        const dates = Object.keys(trendsData);
+        const diseaseValues = dates.map(date => trendsData[date].disease || 0);
+        const varietyValues = dates.map(date => trendsData[date].variety || 0);
+        const totalValues = dates.map(date => trendsData[date].total || 0);
+
+        if (dates.length === 0) {
+            showEmptyChart('trendsChart', 'No trend data available');
+            return;
+        }
+
+        trendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Disease Scans',
+                        data: diseaseValues,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        fill: false,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#dc3545',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Variety Scans',
+                        data: varietyValues,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: false,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#28a745',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Total Scans',
+                        data: totalValues,
+                        borderColor: '#DA9408',
+                        backgroundColor: 'rgba(218, 148, 8, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#DA9408',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(218, 148, 8, 0.1)'
+                        },
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // Get chart options based on type
+    function getChartOptions(type, category) {
+        if (type === 'pie') {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            };
+        } else {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.parsed.y} scans`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(218, 148, 8, 0.1)'
+                        },
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45
+                        }
+                    }
+                }
+            };
+        }
+    }
+
+    // Chart type switching functions
+    function showDiseaseChart(type) {
+        createDiseaseChart(type);
+    }
+
+    function showVarietyChart(type) {
+        createVarietyChart(type);
+    }
+
+    // Refresh dashboard function
+    async function refreshDashboard() {
+        const refreshIcon = document.getElementById('refreshIcon');
+        refreshIcon.classList.add('refresh-indicator');
+        
+        try {
+            const response = await fetch('/farmer-dashboard-data/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+            
+            if (response.ok) {
+                const newData = await response.json();
+                if (newData.success) {
+                    dashboardData = { ...dashboardData, ...newData };
+                    initializeCharts();
+                    updateLastUpdatedTime();
+                    
+                    // Update KPI values with animation
+                    animateValue('totalScans', parseInt(document.getElementById('totalScans').textContent), newData.total_scans || 0);
+                    animateValue('diseaseScans', parseInt(document.getElementById('diseaseScans').textContent), newData.disease_scans || 0);
+                    animateValue('varietyScans', parseInt(document.getElementById('varietyScans').textContent), newData.variety_scans || 0);
+                    animateValue('todayScans', parseInt(document.getElementById('todayScans').textContent), newData.today_scans || 0);
+                    animateValue('weekScans', parseInt(document.getElementById('weekScans').textContent), newData.week_scans || 0);
+                    animateValue('monthScans', parseInt(document.getElementById('monthScans').textContent), newData.month_scans || 0);
+                }
+            } else {
+                throw new Error('Failed to refresh data');
+            }
+        } catch (error) {
+            showError('Failed to refresh dashboard: ' + error.message);
+        } finally {
+            refreshIcon.classList.remove('refresh-indicator');
+        }
+    }
+
+    // Export data function
+    async function exportData() {
+        try {
+            const response = await fetch('/export-dashboard-data/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `scan_data_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                throw new Error('Export failed');
+            }
+        } catch (error) {
+            showError('Failed to export data: ' + error.message);
+        }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            refreshDashboard();
+        }
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            exportData();
+        }
+    });
+
+    // Auto-refresh every 5 minutes
+    setInterval(() => {
+        refreshDashboard();
+    }, 300000);
+
+    // Page visibility API - refresh when user comes back to tab
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            // User came back to the tab, refresh data
+            setTimeout(() => {
+                refreshDashboard();
+            }, 1000);
+        }
+    });
+</script>
+{% endblock %}

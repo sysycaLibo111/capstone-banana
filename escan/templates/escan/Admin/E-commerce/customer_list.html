@@ -1,0 +1,954 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+    <title>Customer Management - {{ request.user.username }}'s Store</title>
+    <!-- External Resources -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== ROOT VARIABLES ========== */
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+
+        /* ========== BASE STYLES ========== */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+        }
+
+        /* Sidebar Styles */
+        nav.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(251, 210, 66, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bright-gold);
+        }
+
+        nav .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            margin-top: 20px;
+        }
+
+        nav .menu a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        nav .menu a:hover {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a i {
+            width: 24px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .content {
+           margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        /* ========== NAVIGATION BAR ========== */
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            margin: 0;
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        .store-info {
+            font-size: 16px;
+            color: var(--light-brown);
+            background-color: var(--light-bg);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 2;
+            min-width: 300px;
+        }
+
+         .search-box {
+            display: flex;
+            font-size: 20px;
+            align-items: center;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 30px;
+            padding: 5px 15px;
+            border: 1px solid rgba(112, 66, 16, 0.2);
+            transition: all 0.3s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.2);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 8px;
+            width: 200px;
+        }
+
+        .search-box button {
+            background: none;
+            border: none;
+            color: var(--gold);
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-print {
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 3px 10px rgba(218, 148, 8, 0.3);
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(218, 148, 8, 0.4);
+        }
+
+        /* Settings Dropdown */
+        .settings-icon {
+            position: relative;
+            cursor: pointer;
+            color: var(--medium-brown);
+            font-size: 20px;
+            margin-left: 15px;
+        }
+
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            font-size: 20px;
+            background-color: var(--white);
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 100;
+            padding: 10px 0;
+        }
+
+        .settings-icon:hover .settings-dropdown {
+            display: block;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: var(--medium-brown);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .settings-item:hover {
+            background-color: rgba(251, 213, 118, 0.2);
+            color: var(--gold);
+        }
+
+        .settings-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-footer {
+            border-top: 1px solid rgba(112, 66, 16, 0.1);
+            margin-top: 5px;
+            padding-top: 5px;
+        }
+
+        .right_side_process{
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== CUSTOMER TABLE ========== */
+        .table-container {
+            background-color: var(--white);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .customer-table {
+            width: 100%;
+            border-collapse: separate;
+            font-size: 20px;
+            border-spacing: 0;
+        }
+
+        .customer-table thead th {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            padding: 15px;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+
+        .customer-table tbody tr {
+            background-color: var(--white);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .customer-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .customer-table td {
+            padding: 15px 20px;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .customer-table td:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .customer-table td:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .customer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light-gold);
+            transition: var(--transition);
+        }
+
+        .customer-avatar:hover {
+            transform: scale(3);
+            z-index: 10;
+            border-color: var(--gold);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .btn-view {
+            background-color: var(--gold);
+            color: var(--white);
+        }
+
+        .btn-view:hover {
+            background-color: var(--light-brown);
+        }
+
+        .btn-edit {
+            background-color: var(--light-gold);
+            color: var(--dark-brown);
+        }
+
+        .btn-edit:hover {
+            background-color: var(--gold);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            background-color: #EF4444;
+            color: var(--white);
+        }
+
+        .btn-delete:hover {
+            background-color: #DC2626;
+        }
+
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--medium-brown);
+        }
+
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+
+        .empty-state p {
+            font-size: 18px;
+        }
+
+        /* ========== TOAST NOTIFICATION ========== */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--gold);
+            color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+            transform: translateX(0);
+        }
+
+        /* ========== SETTINGS DROPDOWN ========== */
+        .settings-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 120%;
+            font-size: 25px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            width: 220px;
+            overflow: hidden;
+        }
+
+        .settings-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark-brown);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .settings-item:hover {
+            background-color: var(--light-bg);
+            color: var(--gold);
+        }
+
+        .settings-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-footer {
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* ========== PRINT STYLES ========== */
+        @media print {
+            nav.sidebar, .nav-bar, .action-btns, .settings-icon, .burger {
+                display: none !important;
+            }
+            
+            .content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            
+            body {
+                background-color: white !important;
+            }
+            
+            .table-container {
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            
+            .customer-table {
+                font-size: 12px !important;
+            }
+            
+            .customer-avatar:hover {
+                transform: none !important;
+            }
+
+            /* Add header for printed document */
+            @page {
+                margin: 1cm;
+                @top-center {
+                    content: "Customer List - {{ request.user.username }}'s Store";
+                    font-size: 16px;
+                    color: var(--medium-brown);
+                }
+                @bottom-center {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-size: 12px;
+                }
+            }
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* ========== RESPONSIVE STYLES ========== */
+        @media (max-width: 1200px) {
+            nav.sidebar {
+                width: 250px;
+            }
+            .content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-bar {
+                gap: 15px;
+            }
+            
+            .search-container {
+                order: 2;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav.sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+            }
+            nav.sidebar.active {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+            }
+            .burger {
+                display: block;
+            }
+            .nav-bar {
+                padding-top: 60px;
+            }
+            
+            .customer-table thead {
+                display: none;
+            }
+            
+            .customer-table tbody tr {
+                display: block;
+                margin-bottom: 20px;
+            }
+            
+            .customer-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px;
+                text-align: right;
+                border-bottom: 1px solid var(--light-gold);
+            }
+            
+            .customer-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--medium-brown);
+                margin-right: auto;
+                padding-right: 20px;
+            }
+            
+            .customer-table td:first-child {
+                border-radius: 10px 10px 0 0;
+            }
+            
+            .customer-table td:last-child {
+                border-radius: 0 0 10px 10px;
+                border-bottom: none;
+            }
+            
+            .action-btns {
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .btn-print {
+                flex-grow: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'product_list' %}" ><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'a_market_place' %}"><i class="fas fa-store"></i> Market Place</a>
+            <a href="{% url 'validation_list' %}"><i class="fas fa-briefcase"></i> Store Applicants</a>
+            <a href="{% url 'orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'customer_table' %}"class="active"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="{% url 'a_scan' %}"><i class="fas fa-qrcode"></i> Scan</a>
+            <a href="{% url 'a_scan' %}#knowledge-section"><i class="fas fa-book-reader"></i> Library</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+        <div class="burger" id="burger" onclick="toggleNav()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </nav>
+    
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="content">
+        <!-- ========== NAVIGATION BAR ========== -->
+        <div class="nav-bar">
+            <div>
+                <div class="page-title">Customer Management</div>
+                <div class="store-info">
+                    <i class="fas fa-store"></i> Showing customers from your store only
+                </div>
+            </div>
+             <div class="right_side_process">
+            <div class="search-box">
+                    <input type="text" id="searchBox" placeholder="Search customers...">
+                    <button class="search-btn" onclick="searchCustomers()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            
+            
+            <div class="action-buttons">
+                <button class="btn-print" onclick="printCustomerTable()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+
+            <div class="settings-icon" id="settings-icon">
+                        <i class="fas fa-cog"></i>
+                        <div class="settings-dropdown">
+                            <a href="" class="settings-item"><i class="fas fa-user"></i> Profile</a>
+                            <a href="" class="settings-item"><i class="fas fa-map-marker-alt"></i> Address Details</a>
+                            <a href="" class="settings-item"><i class="fas fa-map"></i> Location Mapping</a>
+                            <div class="dropdown-footer">
+                                <a href="{% url 'logout' %}" class="settings-item" style="color: #EF4444;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+        </div>
+        
+        <!-- ========== CUSTOMER TABLE ========== -->
+        <div class="table-container">
+            {% if customers %}
+            <table class="customer-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Orders</th>
+                        <th>Last Purchase</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td data-label="Customer">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img src="{{ customer.user.image_url|default:'/static/img/default-profile.png' }}" 
+                                     alt="{{ customer.user.username }}" 
+                                     class="customer-avatar"
+                                     onerror="this.src='{% static 'img/default-profile.png' %}'">
+                                <span>{{ customer.user.first_name }} {{ customer.user.last_name }}</span>
+                            </div>
+                        </td>
+                        <td data-label="Username">{{ customer.user.username }}</td>
+                        <td data-label="Email">{{ customer.user.email }}</td>
+                        <td data-label="Orders">
+                            {% with customer.order_set.count as order_count %}
+                                {{ order_count }} order{{ order_count|pluralize }}
+                            {% endwith %}
+                        </td>
+                        <td data-label="Last Purchase">
+                            {% with customer.order_set.first as last_order %}
+                                {% if last_order %}
+                                    {{ last_order.created_at|date:"M d, Y" }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td data-label="Actions">
+                            <div class="action-btns">
+                                <button class="btn-action btn-view" title="View Details" onclick="viewCustomer('{{ customer.id }}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <p>No customers found for your store</p>
+                <p class="mt-2">Customers will appear here after they make purchases from your store</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ========== SIDEBAR TOGGLE ==========
+            function toggleNav() {
+                const sidebar = document.getElementById('sidebar');
+                const burger = document.getElementById('burger');
+                sidebar.classList.toggle('active');
+                burger.classList.toggle('active');
+            }
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const burger = document.getElementById('burger');
+                
+                if (!sidebar.contains(event.target) && !burger.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                    burger.classList.remove('active');
+                }
+            });
+
+            // ========== SEARCH FUNCTIONALITY ==========
+            const searchBox = document.getElementById('searchBox');
+            searchBox.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    searchCustomers();
+                }
+            });
+
+            function searchCustomers() {
+                const query = searchBox.value.trim().toLowerCase();
+                const rows = document.querySelectorAll('.customer-table tbody tr');
+                
+                rows.forEach(row => {
+                    const name = row.querySelector('td:first-child span').textContent.toLowerCase();
+                    const username = row.cells[1].textContent.toLowerCase();
+                    const email = row.cells[2].textContent.toLowerCase();
+                    
+                    if (name.includes(query) || username.includes(query) || email.includes(query)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            // ========== CUSTOMER ACTIONS ==========
+            function viewCustomer(customerId) {
+                // Implement view functionality
+                showToast(`Viewing customer ${customerId}`, 'info');
+                console.log('View customer:', customerId);
+                
+                // Redirect to customer detail page or show modal
+                window.location.href = `/customers/${customerId}/`;
+            }
+
+            // ========== PRINT FUNCTIONALITY ==========
+            function printCustomerTable() {
+                // Create a print-friendly version
+                const printContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Customer List - {{ request.user.username }}'s Store</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            h1 { color: #704210; text-align: center; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th { background-color: #704210; color: white; padding: 10px; text-align: left; }
+                            td { padding: 8px; border-bottom: 1px solid #ddd; }
+                            .footer { margin-top: 30px; text-align: right; font-size: 12px; color: #666; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Customer List - {{ request.user.username }}'s Store</h1>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Orders</th>
+                                    <th>Last Purchase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
+                                    <td>{{ customer.user.username }}</td>
+                                    <td>{{ customer.user.email }}</td>
+                                    <td>{{ customer.order_set.count }} order{{ customer.order_set.count|pluralize }}</td>
+                                    <td>
+                                        {% with customer.order_set.first as last_order %}
+                                            {% if last_order %}
+                                                {{ last_order.created_at|date:"M d, Y" }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="footer">
+                            Printed from Escan System • {{ request.user.username }}
+                        </div>
+                    </body>
+                    </html>
+                `;
+                
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(printContent);
+                printWindow.document.close();
+                
+                // Wait for content to load before printing
+                printWindow.onload = function() {
+                    printWindow.print();
+                    // printWindow.close(); // Uncomment to automatically close after printing
+                };
+            }
+
+            // ========== TOAST NOTIFICATION FUNCTION ==========
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                
+                const icon = type === 'success' ? 'fa-check-circle' : 
+                            type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+                toast.innerHTML = `
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                `;
+                
+                if (type === 'error') {
+                    toast.style.background = '#EF4444';
+                } else if (type === 'info') {
+                    toast.style.background = '#3B82F6';
+                }
+                
+                document.body.appendChild(toast);
+                
+                // Remove toast after animation
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            // Make table rows responsive
+            function setupResponsiveTable() {
+                if (window.innerWidth <= 768) {
+                    const headers = document.querySelectorAll('.customer-table thead th');
+                    const cells = document.querySelectorAll('.customer-table td');
+                    
+                    headers.forEach((header, index) => {
+                        const label = header.textContent;
+                        cells.forEach(cell => {
+                            if (cell.cellIndex === index) {
+                                cell.setAttribute('data-label', label);
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Initialize on load and resize
+            setupResponsiveTable();
+            window.addEventListener('resize', setupResponsiveTable);
+        });
+    </script>
+</body>
+</html>

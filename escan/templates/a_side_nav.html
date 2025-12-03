@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(251, 213, 118, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(218, 148, 8, 0.3);
+        }
+
+        .menu {
+            padding: 20px 0;
+        }
+
+        .menu a {
+            display: block;
+            color: var(--light-gold);
+            padding: 12px 25px;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .menu a:hover, .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .menu a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+            }
+            
+            .burger {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+            }
+            
+            .menu a {
+                font-size: 18px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="burger" id="burger" onclick="toggleNav()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'product_list' %}" class="active"><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'a_market_place' %}"><i class="fas fa-store"></i> Market Place</a>
+            <a href="{% url 'validation_list' %}"><i class="fas fa-briefcase"></i> Store Applicants</a>
+            <a href="{% url 'orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'customer_table' %}"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="{% url 'a_scan' %}"><i class="fas fa-qrcode"></i> Scan</a>
+            <a href="{% url 'a_scan' %}#knowledge-section"><i class="fas fa-book-reader"></i> Library</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- JavaScript for mobile navigation -->
+    <script>
+        // Toggle sidebar on mobile
+        function toggleNav() {
+            const sidebar = document.getElementById('sidebar');
+            const burger = document.getElementById('burger');
+            sidebar.classList.toggle('active');
+            burger.classList.toggle('active');
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const burger = document.getElementById('burger');
+            const isMobile = window.innerWidth <= 992;
+            
+            if (isMobile && sidebar.classList.contains('active') && 
+                !sidebar.contains(event.target) && 
+                !burger.contains(event.target)) {
+                sidebar.classList.remove('active');
+                burger.classList.remove('active');
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const burger = document.getElementById('burger');
+            
+            if (window.innerWidth > 992) {
+                sidebar.classList.remove('active');
+                burger.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'assets/LogoW.png' %}" type="image/png">
+    <title>Orders Management - {{ request.user.username }}</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --success-green: #28a745;
+            --pending: #F59E0B;
+            --processing: #3B82F6;
+            --delivered: #8B5CF6;
+            --completed: #10B981;
+            --cancelled: #EF4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        nav.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(251, 210, 66, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bright-gold);
+        }
+
+        nav .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            margin-top: 20px;
+        }
+
+        nav .menu a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        nav .menu a:hover {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        /* Navbar Styles */
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            margin: 0;
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .search-export-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--medium-brown);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--bright-gold));
+            color: white;
+            box-shadow: 0 4px 15px rgba(218, 148, 8, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 148, 8, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: white;
+        }
+
+        /* Status Filter */
+        .status-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--light-bg);
+            border-radius: 10px;
+        }
+
+        .status-filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .status-filter-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .status-all { background: linear-gradient(135deg, #6B7280, #9CA3AF); color: white; }
+        .status-pending-btn { background: var(--pending); color: white; }
+        .status-processing-btn { background: var(--processing); color: white; }
+        .status-delivered-btn { background: var(--delivered); color: white; }
+        .status-completed-btn { background: var(--completed); color: white; }
+        .status-cancelled-btn { background: var(--cancelled); color: white; }
+
+        /* Calendar Section */
+        .calendar-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark-brown);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calendar-container {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: linear-gradient(135deg, var(--medium-brown), var(--light-brown));
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+        }
+
+        .calendar-day {
+            background: var(--white);
+            min-height: 100px;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: var(--light-bg);
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #9ca3af;
+        }
+
+        .calendar-day.has-pending { border-left: 4px solid var(--pending); }
+        .calendar-day.has-processing { border-left: 4px solid var(--processing); }
+        .calendar-day.has-delivered { border-left: 4px solid var(--delivered); }
+        .calendar-day.has-completed { border-left: 4px solid var(--completed); }
+        .calendar-day.has-cancelled { border-left: 4px solid var(--cancelled); }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .order-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--gold);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .status-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 5px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .indicator-pending { background: var(--pending); }
+        .indicator-processing { background: var(--processing); }
+        .indicator-delivered { background: var(--delivered); }
+        .indicator-completed { background: var(--completed); }
+        .indicator-cancelled { background: var(--cancelled); }
+
+        .calendar-navigation {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Orders Table */
+        .orders-section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .table-container {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .orders-table th {
+            background: linear-gradient(135deg, var(--medium-brown), var(--light-brown));
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .orders-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 12px;
+        }
+
+        .orders-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .customer-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--light-gold);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-pending { background: var(--pending); color: white; }
+        .badge-processing, .badge-on.process { background: var(--processing); color: white; }
+        .badge-delivered { background: var(--delivered); color: white; }
+        .badge-completed { background: var(--completed); color: white; }
+        .badge-cancelled { background: var(--cancelled); color: white; }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .schedule-badge {
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+
+        /* Modals */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--medium-brown), var(--light-brown));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .form-control {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(218, 148, 8, 0.1);
+        }
+
+        /* Toast Notifications */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            font-size: 12px;
+        }
+
+        .toast-notification.success {
+            background: var(--success-green);
+        }
+
+        .toast-notification.error {
+            background: var(--cancelled);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            .orders-section,
+            .orders-section * {
+                visibility: visible;
+            }
+            
+            .orders-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border: none;
+            }
+            
+            .no-print,
+            .sidebar,
+            .nav-bar,
+            .control-panel,
+            .calendar-section,
+            .section-header .btn,
+            .action-buttons {
+                display: none !important;
+            }
+            
+            .orders-table {
+                font-size: 10px !important;
+                width: 100% !important;
+            }
+            
+            .orders-table th,
+            .orders-table td {
+                padding: 6px 8px !important;
+                border: 1px solid #ddd !important;
+            }
+            
+            .orders-table th {
+                background: #f8f9fa !important;
+                color: var(--dark-brown) !important;
+                font-weight: bold;
+            }
+            
+            .customer-avatar {
+                display: none;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            nav.sidebar {
+                width: 240px;
+            }
+            .content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav.sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            nav.sidebar.active {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            .burger {
+                display: block;
+            }
+            .search-export-container {
+                flex-direction: column;
+            }
+            .search-box {
+                min-width: 100%;
+            }
+            .calendar-day {
+                min-height: 80px;
+                padding: 5px;
+            }
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+            .status-filter {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+            <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'product_list' %}"><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'a_market_place' %}"><i class="fas fa-store"></i> Market Place</a>
+            <a href="{% url 'validation_list' %}"><i class="fas fa-briefcase"></i> Store Applicants</a>
+            <a href="{% url 'orders_part' %}" class="active"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'customer_table' %}"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="{% url 'a_scan' %}"><i class="fas fa-qrcode"></i> Scan</a>
+            <a href="{% url 'a_scan' %}#knowledge-section"><i class="fas fa-book-reader"></i> Library</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+    </nav>
+
+    <div class="burger" id="burger" onclick="toggleNav()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+    <div class="content">
+        <div class="nav-bar">
+            <h2 class="page-title">ORDERS MANAGEMENT</h2>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel no-print">
+            <div class="search-export-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search orders by customer, product, order ID..." id="searchOrders">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <button class="btn btn-success" onclick="exportFilteredOrders()">
+                    <i class="fas fa-download"></i> Export Results
+                </button>
+                <button class="btn btn-primary" onclick="printOrders()">
+                    <i class="fas fa-print"></i> Print Orders
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="status-filter no-print">
+            <div class="status-filter-btn status-all active" onclick="filterByStatus('all')">All Orders</div>
+            <div class="status-filter-btn status-pending-btn" onclick="filterByStatus('pending')">Pending</div>
+            <div class="status-filter-btn status-processing-btn" onclick="filterByStatus('processing')">Processing</div>
+            <div class="status-filter-btn status-delivered-btn" onclick="filterByStatus('delivered')">Delivered</div>
+            <div class="status-filter-btn status-completed-btn" onclick="filterByStatus('completed')">Completed</div>
+            <div class="status-filter-btn status-cancelled-btn" onclick="filterByStatus('cancelled')">Cancelled</div>
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="calendar-section no-print">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Orders Calendar
+                </div>
+                <div class="calendar-navigation">
+                    <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span id="currentMonthYear" class="fw-bold"></span>
+                    <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="orders-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-list-alt"></i>
+                    Customer Orders
+                    <span class="badge bg-primary" id="ordersCount">{{ customer_orders|length }} orders</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Schedule</th>
+                            <th>Order Date</th>
+                            <th class="no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        {% for order in customer_orders %}
+                        <tr data-order-id="{{ order.id }}" 
+                            data-status="{% if order.status == 'On Process' %}processing{% else %}{{ order.status|lower }}{% endif %}" 
+                            data-date="{{ order.order_date|date:'Y-m-d' }}"
+                            data-customer="{{ order.customer.first_name }} {{ order.customer.last_name }}"
+                            data-product="{{ order.product.name }}">
+                            <td>#{{ order.id }}</td>
+                            <td>
+                                <div class="customer-info">
+                                    {% if order.customer.image_url %}
+                                    <img src="{{ order.customer.image_url }}" alt="Customer" class="customer-avatar">
+                                    {% else %}
+                                    <img src="{% static 'img/default-user.png' %}" alt="Customer" class="customer-avatar">
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold">{{ order.customer.first_name }} {{ order.customer.last_name }}</div>
+                                        <small class="text-muted">{{ order.customer.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ order.product.name }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td class="fw-bold">₱{{ order.total_amount }}</td>
+                            <td>
+                                <span class="status-badge badge-{% if order.status == 'On Process' %}processing{% else %}{{ order.status|lower }}{% endif %}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if order.status == "On Process" %}
+                                    {% if order.process_start and order.process_end %}
+                                        <span class="badge bg-warning schedule-badge">
+                                            <i class="fas fa-clock"></i> {{ order.process_start|date:"M d" }} → {{ order.process_end|date:"M d" }}
+                                        </span>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-warning no-print" onclick="showScheduleModal({{ order.id }}, 'process')">
+                                            <i class="fas fa-calendar-plus"></i> Set Process
+                                        </button>
+                                    {% endif %}
+                                {% elif order.status == "Delivered" %}
+                                    {% if order.delivery_start and order.delivery_end %}
+                                        <span class="badge bg-info schedule-badge">
+                                            <i class="fas fa-truck"></i> {{ order.delivery_start|date:"M d" }} → {{ order.delivery_end|date:"M d" }}
+                                        </span>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-info no-print" onclick="showScheduleModal({{ order.id }}, 'delivery')">
+                                            <i class="fas fa-calendar-plus"></i> Set Delivery
+                                        </button>
+                                    {% endif %}
+                                {% elif order.status == "Completed" %}
+                                    {% if order.completion_date %}
+                                        <span class="badge bg-success schedule-badge">
+                                            <i class="fas fa-check-circle"></i> {{ order.completion_date|date:"M d, Y" }}
+                                        </span>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-success no-print" onclick="showScheduleModal({{ order.id }}, 'completion')">
+                                            <i class="fas fa-calendar-plus"></i> Set Complete
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.order_date|date:"M d, Y" }}</td>
+                            <td class="no-print">
+                                <div class="action-buttons">
+                                    <form method="POST" action="{% url 'update_order_status' order.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <select name="status" class="form-control form-control-sm" onchange="this.form.submit()" style="min-width: 120px;">
+                                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                            <option value="On Process" {% if order.status == 'On Process' %}selected{% endif %}>Processing</option>
+                                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                            <option value="Completed" {% if order.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                        </select>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                <div class="text-muted">No orders found</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scheduleModalTitle">Set Schedule</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleForm" method="POST" action="{% url 'set_order_schedule' %}">
+                        {% csrf_token %}
+                        <input type="hidden" id="scheduleOrderId" name="order_id">
+                        <input type="hidden" id="scheduleType" name="schedule_type">
+                        
+                        <div id="dateRangeFields">
+                            <div class="form-group">
+                                <label class="form-label">Start Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleStart" name="start_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleEnd" name="end_date" required>
+                            </div>
+                        </div>
+                        
+                        <div id="singleDateField" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Completion Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleSingle" name="single_date" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentDate = new Date();
+        let ordersData = [];
+        let filteredOrders = [];
+        let currentStatusFilter = 'all';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeOrdersData();
+            renderCalendar();
+            initializeSearch();
+            updateOrdersCount();
+        });
+
+        // Initialize orders data from table
+        function initializeOrdersData() {
+            const rows = document.querySelectorAll('#ordersTableBody tr[data-order-id]');
+            ordersData = Array.from(rows).map(row => ({
+                id: row.getAttribute('data-order-id'),
+                customer: row.getAttribute('data-customer'),
+                product: row.getAttribute('data-product'),
+                quantity: parseInt(row.cells[3].textContent),
+                amount: parseFloat(row.cells[4].textContent.replace('₱', '')),
+                status: row.getAttribute('data-status'),
+                date: row.getAttribute('data-date'),
+                element: row
+            }));
+            filteredOrders = [...ordersData];
+        }
+
+        // Calendar functionality with color coding
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            // Update month/year display
+            document.getElementById('currentMonthYear').textContent = 
+                currentDate.toLocaleString('default', { month: 'long' }) + ' ' + year;
+
+            // Get first day of month and total days
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = createCalendarDay(daysInPrevMonth - i, true);
+                calendarGrid.appendChild(day);
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const dayElement = createCalendarDay(day, false, dateStr);
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Next month days to fill grid
+            const totalCells = calendarGrid.children.length;
+            const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = createCalendarDay(day, true);
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        function createCalendarDay(dayNumber, isOtherMonth, dateStr = null) {
+            const day = document.createElement('div');
+            day.className = 'calendar-day' + (isOtherMonth ? ' other-month' : '');
+            
+            if (dateStr) {
+                day.setAttribute('data-date', dateStr);
+                
+                const dayOrders = getFilteredOrdersForDate(dateStr);
+                const orderCount = dayOrders.length;
+                
+                if (orderCount > 0) {
+                    // Add status-based color coding
+                    const statusCount = countOrdersByStatus(dayOrders);
+                    
+                    if (statusCount.completed > 0) day.classList.add('has-completed');
+                    else if (statusCount.delivered > 0) day.classList.add('has-delivered');
+                    else if (statusCount.processing > 0) day.classList.add('has-processing');
+                    else if (statusCount.pending > 0) day.classList.add('has-pending');
+                    else if (statusCount.cancelled > 0) day.classList.add('has-cancelled');
+                    
+                    // Create status indicators
+                    let indicatorsHTML = '<div class="status-indicators">';
+                    for (const status in statusCount) {
+                        if (statusCount[status] > 0) {
+                            indicatorsHTML += `<div class="status-indicator indicator-${status}"></div>`;
+                        }
+                    }
+                    indicatorsHTML += '</div>';
+                    
+                    day.innerHTML = `
+                        <div class="day-number">${dayNumber}</div>
+                        ${indicatorsHTML}
+                        <div class="order-count">${orderCount}</div>
+                    `;
+                    
+                    // Add click handler to filter by date
+                    day.addEventListener('click', function() {
+                        filterByDate(dateStr);
+                    });
+                } else {
+                    day.innerHTML = `<div class="day-number">${dayNumber}</div>`;
+                }
+            } else {
+                day.innerHTML = `<div class="day-number">${dayNumber}</div>`;
+            }
+            
+            return day;
+        }
+
+        function getFilteredOrdersForDate(dateStr) {
+            return ordersData.filter(order => 
+                order.date === dateStr && 
+                (currentStatusFilter === 'all' || order.status === currentStatusFilter)
+            );
+        }
+
+        function countOrdersByStatus(orders) {
+            return {
+                pending: orders.filter(o => o.status === 'pending').length,
+                processing: orders.filter(o => o.status === 'processing').length,
+                delivered: orders.filter(o => o.status === 'delivered').length,
+                completed: orders.filter(o => o.status === 'completed').length,
+                cancelled: orders.filter(o => o.status === 'cancelled').length
+            };
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function filterByDate(dateStr) {
+            const searchInput = document.getElementById('searchOrders');
+            searchInput.value = dateStr;
+            
+            filteredOrders = ordersData.filter(order => 
+                order.date === dateStr &&
+                (currentStatusFilter === 'all' || order.status === currentStatusFilter)
+            );
+            
+            updateTable();
+            updateOrdersCount();
+            
+            // Highlight calendar date
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.style.boxShadow = '';
+            });
+            const selectedDay = document.querySelector(`.calendar-day[data-date="${dateStr}"]`);
+            if (selectedDay) {
+                selectedDay.style.boxShadow = '0 0 0 3px var(--gold)';
+            }
+        }
+
+        // Status filtering
+        function filterByStatus(status) {
+            currentStatusFilter = status;
+            
+            // Update active state of filter buttons
+            document.querySelectorAll('.status-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Apply filters to table and calendar
+            applyStatusFilter();
+            renderCalendar();
+        }
+
+        function applyStatusFilter() {
+            const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+            
+            filteredOrders = ordersData.filter(order => {
+                const matchesStatus = currentStatusFilter === 'all' || order.status === currentStatusFilter;
+                const matchesSearch = !searchTerm || 
+                    order.customer.toLowerCase().includes(searchTerm) ||
+                    order.product.toLowerCase().includes(searchTerm) ||
+                    order.id.toString().includes(searchTerm) ||
+                    order.date.includes(searchTerm);
+                
+                return matchesStatus && matchesSearch;
+            });
+            
+            updateTable();
+            updateOrdersCount();
+        }
+
+        // Search functionality
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchOrders');
+            searchInput.addEventListener('input', function() {
+                applyStatusFilter();
+            });
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = tbody.querySelectorAll('tr[data-order-id]');
+            
+            rows.forEach(row => {
+                const orderId = row.getAttribute('data-order-id');
+                const isVisible = filteredOrders.some(order => order.id === orderId);
+                row.style.display = isVisible ? '' : 'none';
+            });
+        }
+
+        function updateOrdersCount() {
+            document.getElementById('ordersCount').textContent = `${filteredOrders.length} orders`;
+        }
+
+        // Export functionality
+        function exportFilteredOrders() {
+            if (filteredOrders.length === 0) {
+                showToast('No orders to export.', 'error');
+                return;
+            }
+
+            let csvContent = "Order ID,Customer,Product,Quantity,Amount,Status,Order Date\n";
+            
+            filteredOrders.forEach(order => {
+                csvContent += `"${order.id}","${order.customer}","${order.product}",${order.quantity},${order.amount},"${order.status}","${order.date}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Orders exported successfully!', 'success');
+        }
+
+        // Print functionality
+        function printOrders() {
+            window.print();
+        }
+
+        // Schedule functionality
+        function showScheduleModal(orderId, type) {
+            document.getElementById("scheduleOrderId").value = orderId;
+            document.getElementById("scheduleType").value = type;
+
+            // Set modal title based on type
+            const titleMap = {
+                'process': 'Set Process Schedule',
+                'delivery': 'Set Delivery Schedule',
+                'completion': 'Set Completion Date'
+            };
+            document.getElementById("scheduleModalTitle").textContent = titleMap[type] || 'Set Schedule';
+
+            if (type === "completion") {
+                document.getElementById("dateRangeFields").style.display = "none";
+                document.getElementById("singleDateField").style.display = "block";
+            } else {
+                document.getElementById("dateRangeFields").style.display = "block";
+                document.getElementById("singleDateField").style.display = "none";
+            }
+
+            // Clear previous values
+            document.getElementById("scheduleStart").value = '';
+            document.getElementById("scheduleEnd").value = '';
+            document.getElementById("scheduleSingle").value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+            modal.show();
+        }
+
+        function saveSchedule() {
+            const form = document.getElementById('scheduleForm');
+            form.submit();
+        }
+
+        // Utility function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Toast notification function
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Sidebar toggle
+        function toggleNav() {
+            const sidebar = document.querySelector('nav.sidebar');
+            const burger = document.getElementById('burger');
+            sidebar.classList.toggle('active');
+            burger.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('nav.sidebar');
+            const burger = document.getElementById('burger');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !burger.contains(event.target)) {
+                sidebar.classList.remove('active');
+                burger.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

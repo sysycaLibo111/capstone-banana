@@ -1,0 +1,1171 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Store Dashboard</title>
+    <!-- External Resources -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>  
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ========== ROOT VARIABLES ========== */
+        :root {
+            --dark-brown: #2F1609;
+            --medium-brown: #704210;
+            --light-brown: #96500E;
+            --gold: #DA9408;
+            --light-gold: #FBD576;
+            --bright-gold: #FBD242;
+            --white: #FFFFFF;
+            --light-bg: #FFF9EC;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm: 0 2px 5px rgba(0,0,0,0.1);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 25px rgba(218, 148, 8, 0.15);
+        }
+
+        /* ========== BASE STYLES ========== */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--light-bg);
+            color: var(--dark-brown);
+        }
+
+        /* Sidebar Styles */
+        nav.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(to bottom, var(--medium-brown), var(--light-brown));
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(251, 210, 66, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--bright-gold);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--bright-gold);
+        }
+
+        nav .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            margin-top: 20px;
+        }
+
+        nav .menu a {
+            color: var(--light-gold);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        nav .menu a:hover {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a.active {
+            background: linear-gradient(to right, var(--gold), transparent);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        nav .menu a i {
+            width: 24px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background-color: var(--gold);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .burger div {
+            width: 25px;
+            height: 3px;
+            background-color: var(--white);
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        .burger.active div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .burger.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger.active div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .content {
+           margin-left: 280px;
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        /* ========== NAVIGATION BAR ========== */
+        .nav-bar {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 25px;
+            font-weight: 600;
+            color: var(--medium-brown);
+            margin: 0;
+            position: relative;
+        }
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--gold), var(--bright-gold));
+        }
+
+        .cart-container {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .cart-icon {
+            position: relative;
+            color: var(--medium-brown);
+            transition: var(--transition);
+        }
+
+        .cart-icon:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .cart-item-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--gold);
+            color: var(--white);
+            border-radius: 50%;
+            font-size: 15px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+            font-size: 25px;
+        }
+
+        .settings-icon {
+            cursor: pointer;
+            color: var(--medium-brown);
+            transition: var(--transition);
+        }
+
+        .notification-icon:hover,
+        .settings-icon:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        /*  */
+
+        .settings-icon {
+            font-size: 25px;
+            position: relative;
+            cursor: pointer;
+            color: var(--light-gold);
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-icon:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            background: white;
+            color: black;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            min-width: 200px;
+            overflow: hidden;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .settings-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .settings-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .settings-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: black;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .settings-dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .settings-dropdown a:hover {
+            background-color: #f8f9fa;
+            color: black;
+            padding-left: 25px;
+        }
+
+        .settings-dropdown a.logout-link:hover {
+            background-color: #fff5f5;
+            color: var(--danger);
+        }
+
+
+        /* ========== DASHBOARD SPECIFIC STYLES ========== */
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--light-gold);
+            height: 100%;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.9;
+        }
+        
+        .stats-content h3 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .stats-content p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .stats-content small {
+            opacity: 0.8;
+            font-size: 0.8rem;
+        }
+
+        .metric-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--light-gold);
+            text-align: center;
+            height: 100%;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.5rem;
+        }
+
+        .metric-content h4 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+        }
+
+        .metric-content p {
+            margin: 5px 0 0 0;
+            color: var(--medium-brown);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid var(--light-gold);
+            height: 100%;
+        }
+        
+        .chart-header {
+            background: linear-gradient(to right, var(--medium-brown), var(--light-brown));
+            color: var(--white);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gold);
+        }
+        
+        .chart-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .chart-body {
+            padding: 20px;
+            background: var(--white);
+        }
+
+        .customer-stat, .stock-stat {
+            padding: 10px;
+        }
+        
+        .customer-stat h3, .stock-stat h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .customer-stat small, .stock-stat small {
+            color: var(--medium-brown);
+            font-weight: 500;
+        }
+        
+        .real-time-stock {
+            text-align: center;
+        }
+
+        .table th {
+            background-color: var(--light-bg);
+            color: var(--medium-brown);
+            font-weight: 600;
+            border-bottom: 2px solid var(--gold);
+        }
+        
+        .table td {
+            border-color: rgba(218, 148, 8, 0.2);
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: var(--light-bg);
+            border-color: var(--gold);
+            color: var(--dark-brown);
+        }
+
+        /* ========== RESPONSIVE STYLES ========== */
+        @media (max-width: 1200px) {
+            nav.sidebar {
+                width: 250px;
+            }
+            .content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .stats-content h3 {
+                font-size: 1.5rem;
+            }
+            .metric-content h4 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav.sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+            }
+            nav.sidebar.active {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+            }
+            .burger {
+                display: block;
+            }
+            .nav-bar {
+                padding-top: 60px;
+            }
+            .stats-card, .metric-card {
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .nav-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding: 15px;
+            }
+            .cart-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+   <nav class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
+        </div>
+        <div class="menu">
+             <div class="menu">
+           <a href="{% url 'my_store_dashboard' %}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="{% url 'my_store' %}"><i class="fas fa-store-alt"></i> My Store</a>
+            <a href="{% url 'my_store_orders_part' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="{% url 'u_customer_list' %}"><i class="bi bi-people-fill"></i> Customers</a>
+            <a href="#"><i class="fas fa-file-alt"></i> History</a>
+        </div>
+        </div>
+        <div class="burger" id="burger" onclick="toggleNav()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </nav>
+    
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="content">
+        <!-- ========== NAVIGATION BAR ========== -->
+        <div class="nav-bar">
+            <div class="page-title">MY STORE DASHBOARD</div>
+            
+            <div class="cart-container">
+                
+                <div class="icons">
+                     <a href="{% url 'market_landing' %}" class="cart-icon flex items-center gap-2">
+    <i class="fas fa-home">Home</i>
+</a>
+                    <!-- <div class="notification-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                    </div> -->
+                </div>
+            <div class="settings-icon">
+                <div class="s_icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="settings-dropdown">
+                    <a href="{% url 'm_setting' %}"><i class="fas fa-user"></i> Setting Detail</a>
+                    <a href="{% url 'logout' %}" style="color: var(--danger);">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        {% if no_store %}
+        <!-- No Store Message -->
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading" style="color: var(--medium-brown);">No Store Found!</h4>
+            <p>You need to create a store first to access the dashboard.</p>
+            <hr style="border-color: var(--gold);">
+            <p class="mb-0">Please set up your store to start selling.</p>
+        </div>
+        {% else %}
+        
+        <!-- ========== DASHBOARD STATS CARDS ========== -->
+        <div class="row mb-4">
+            <!-- Total Customers -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--medium-brown), var(--light-brown));">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_customers }}</h3>
+                        <p>Total Customers</p>
+                        <small>{{ new_customers_month }} new this month</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Sales Revenue -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--light-brown), var(--gold));">
+                    <div class="stats-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>₱{{ total_sales|floatformat:2 }}</h3>
+                        <p>Total Revenue</p>
+                        <small>All time sales</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Today's Sales -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--gold), var(--bright-gold));">
+                    <div class="stats-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>₱{{ today_sales|floatformat:2 }}</h3>
+                        <p>Today's Sales</p>
+                        <small>
+                            {% with last_day=weekly_sales_data|last %}
+                                {{ last_day.order_count|default:0 }} orders today
+                            {% endwith %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Stocks -->
+            <div class="col-md-3 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, var(--dark-brown), var(--medium-brown));">
+                    <div class="stats-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3>{{ total_stocks }}</h3>
+                        <p>Total Stock</p>
+                        <small>{{ low_stock_products }} low stock items</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADDITIONAL METRICS ROW ========== -->
+        <div class="row mb-4">
+            <!-- Weekly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--gold);">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ weekly_sales|floatformat:2 }}</h4>
+                        <p>This Week</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monthly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--light-brown);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ monthly_sales|floatformat:2 }}</h4>
+                        <p>This Month</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Yearly Sales -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--medium-brown);">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>₱{{ yearly_sales|floatformat:2 }}</h4>
+                        <p>This Year</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--bright-gold);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ total_orders }}</h4>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completed Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--gold);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ completed_orders }}</h4>
+                        <p>Completed</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Orders -->
+            <div class="col-md-2 mb-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: var(--light-bg); color: var(--light-brown);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-content">
+                        <h4>{{ pending_orders }}</h4>
+                        <p>Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CHARTS SECTION ========== -->
+        <div class="row mb-4">
+            <!-- Sales Chart -->
+            <div class="col-md-8 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line me-2"></i>Weekly Sales Performance</h4>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="salesChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Status Chart -->
+            <div class="col-md-4 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-pie me-2"></i>Order Status</h4>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="orderStatusChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADDITIONAL DATA VISUALIZATION ========== -->
+        <div class="row mb-4">
+            <!-- Customer Analytics -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-user-chart me-2"></i>Customer Analytics</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="customer-stat">
+                                    <h3 style="color: var(--gold);">{{ new_customers_month }}</h3>
+                                    <small style="color: var(--medium-brown);">New This Month</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="customer-stat">
+                                    <h3 style="color: var(--bright-gold);">{{ repeat_customers }}</h3>
+                                    <small style="color: var(--medium-brown);">Repeat Customers</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="customer-stat">
+                                    <h3 style="color: var(--light-brown);">{{ total_customers }}</h3>
+                                    <small style="color: var(--medium-brown);">Total Customers</small>
+                                </div>
+                            </div>
+                        </div>
+                        <canvas id="customerChart" height="150" class="mt-3"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stock Overview -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-boxes me-2"></i>Stock Overview</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <div class="stock-stat">
+                                    <h3 style="color: var(--gold);">{{ total_stocks }}</h3>
+                                    <small style="color: var(--medium-brown);">Total Stock</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stock-stat">
+                                    <h3 style="color: var(--gold);">{{ low_stock_products }}</h3>
+                                    <small style="color: var(--medium-brown);">Low Stock</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stock-stat">
+                                    <h3 style="color: var(--light-brown);">{{ out_of_stock_products }}</h3>
+                                    <small style="color: var(--medium-brown);">Out of Stock</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stock-value" style="background: var(--light-bg); padding: 15px; border-radius: 8px;">
+                            <h5 style="color: var(--dark-brown); margin: 0;">
+                                Total Stock Value: <span style="color: var(--light-brown);">₱{{ stock_value|floatformat:2 }}</span>
+                            </h5>
+                        </div>
+                        <!-- Real-time stock updates -->
+                        <div class="real-time-stock mt-3 text-center">
+                            <small style="color: var(--medium-brown);">
+                                <i class="fas fa-sync-alt me-1" style="color: var(--gold);"></i>
+                                Real-time stock monitoring active
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== TOP PRODUCTS TABLE ========== -->
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-star me-2"></i>Top Selling Products</h4>
+                    </div>
+                    <div class="chart-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" style="color: var(--dark-brown);">
+                                <thead>
+                                    <tr style="background: var(--light-bg);">
+                                        <th style="color: var(--medium-brown); border-color: var(--gold);">Product Name</th>
+                                        <th style="color: var(--medium-brown); border-color: var(--gold);">Price</th>
+                                        <th style="color: var(--medium-brown); border-color: var(--gold);">Stock</th>
+                                        <th style="color: var(--medium-brown); border-color: var(--gold);">Total Sold</th>
+                                        <th style="color: var(--medium-brown); border-color: var(--gold);">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in top_products %}
+                                    <tr>
+                                        <td style="color: var(--dark-brown);">{{ product.name }}</td>
+                                        <td style="color: var(--light-brown); font-weight: 600;">₱{{ product.price|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="badge {% if product.stock < 10 %}" style="background: var(--gold); color: var(--white);{% else %}" style="background: var(--light-brown); color: var(--white);{% endif %}">
+                                                {{ product.stock }}
+                                            </span>
+                                        </td>
+                                        <td style="color: var(--dark-brown);">{{ product.total_sold|default:0 }}</td>
+                                        <td style="color: var(--light-brown); font-weight: 600;">₱{{ product.total_revenue|default:0|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center" style="color: var(--medium-brown);">No sales data available yet</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sales Chart - Using your theme colors
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const weeklySalesData = {{ weekly_sales_json|safe }};
+            
+            const salesChart = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: weeklySalesData.map(item => item.day),
+                    datasets: [{
+                        label: 'Daily Revenue',
+                        data: weeklySalesData.map(item => item.total_sales),
+                        borderColor: '#DA9408', // --gold
+                        backgroundColor: 'rgba(218, 148, 8, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Orders',
+                        data: weeklySalesData.map(item => item.order_count),
+                        borderColor: '#704210', // --medium-brown
+                        backgroundColor: 'rgba(112, 66, 16, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Sales & Orders Trend',
+                            color: '#2F1609' // --dark-brown
+                        },
+                        legend: {
+                            labels: {
+                                color: '#2F1609' // --dark-brown
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(112, 66, 16, 0.1)'
+                            },
+                            ticks: {
+                                color: '#2F1609' // --dark-brown
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(112, 66, 16, 0.1)'
+                            },
+                            ticks: {
+                                color: '#2F1609' // --dark-brown
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Order Status Chart - Using your theme colors
+            const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+            const orderStatusData = {{ order_status_json|safe }};
+            
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: orderStatusData.map(item => item.status),
+                    datasets: [{
+                        data: orderStatusData.map(item => item.count),
+                        backgroundColor: [
+                            '#DA9408', // --gold
+                            '#704210', // --medium-brown
+                            '#96500E', // --light-brown
+                            '#FBD576', // --light-gold
+                            '#2F1609'  // --dark-brown
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#FFF9EC' // --light-bg
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#2F1609', // --dark-brown
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Customer Chart - Using your theme colors
+            const customerCtx = document.getElementById('customerChart').getContext('2d');
+            const customerChart = new Chart(customerCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['New', 'Repeat', 'Total'],
+                    datasets: [{
+                        label: 'Customers',
+                        data: [{{ new_customers_month }}, {{ repeat_customers }}, {{ total_customers }}],
+                        backgroundColor: [
+                            'rgba(218, 148, 8, 0.8)',    // --gold
+                            'rgba(112, 66, 16, 0.8)',    // --medium-brown
+                            'rgba(150, 80, 14, 0.8)'     // --light-brown
+                        ],
+                        borderColor: [
+                            '#DA9408',   // --gold
+                            '#704210',   // --medium-brown
+                            '#96500E'    // --light-brown
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(112, 66, 16, 0.1)'
+                            },
+                            ticks: {
+                                color: '#2F1609' // --dark-brown
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#2F1609' // --dark-brown
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ========== SIDEBAR TOGGLE ==========
+            function toggleNav() {
+                const sidebar = document.querySelector('.sidebar');
+                const burger = document.getElementById('burger');
+                sidebar.classList.toggle('active');
+                burger.classList.toggle('active');
+            }
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                const sidebar = document.querySelector('.sidebar');
+                const burger = document.getElementById('burger');
+                
+                if (!sidebar.contains(event.target) && !burger.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                    burger.classList.remove('active');
+                }
+            });
+
+            // ========== SETTINGS DROPDOWN ==========
+            const settingsIcon = document.getElementById('settings-icon');
+            if (settingsIcon) {
+                settingsIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dropdown = this.querySelector('.settings-dropdown');
+                    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                });
+
+                // Prevent dropdown from closing when clicking inside
+                document.querySelector('.settings-dropdown').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            window.addEventListener('click', function() {
+                const dropdown = document.querySelector('.settings-dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // ========== NOTIFICATIONS ==========
+            function toggleNotifications() {
+                // Show toast notification
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerHTML = `
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications feature would be implemented here</span>
+                `;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            // Real-time data simulation
+            function simulateRealTimeUpdates() {
+                setInterval(() => {
+                    // This would be replaced with actual API calls to get real-time data
+                    console.log('Checking for real-time updates...');
+                }, 30000); // Check every 30 seconds
+            }
+
+            // Start real-time updates
+            simulateRealTimeUpdates();
+        });
+
+        // Toast notification styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .toast-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: var(--gold);
+                color: var(--white);
+                border-radius: 8px;
+                box-shadow: var(--shadow-md);
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+           // Settings dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsIcon = document.querySelector('.settings-icon');
+            const settingsDropdown = document.querySelector('.settings-dropdown');
+            
+            // Toggle dropdown on settings icon click
+            settingsIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                settingsDropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!settingsIcon.contains(e.target)) {
+                    settingsDropdown.classList.remove('show');
+                }
+            });
+            
+            // Close dropdown when clicking on a dropdown item
+            settingsDropdown.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    settingsDropdown.classList.remove('show');
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            settingsDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+    </script>
+</body>
+</html>
