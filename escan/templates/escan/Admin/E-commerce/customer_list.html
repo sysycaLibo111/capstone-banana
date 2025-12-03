@@ -736,28 +736,24 @@
                     <tr>
                         <td data-label="Customer">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <img src="{{ customer.user.image_url|default:'/static/img/default-profile.png' }}" 
-                                     alt="{{ customer.user.username }}" 
+                                <img src="{{ customer.image_url|default:'/static/img/default-profile.png' }}" 
+                                     alt="{{ customer.username }}" 
                                      class="customer-avatar"
                                      onerror="this.src='{% static 'img/default-profile.png' %}'">
-                                <span>{{ customer.user.first_name }} {{ customer.user.last_name }}</span>
+                                <span>{{ customer.first_name }} {{ customer.last_name }}</span>
                             </div>
                         </td>
-                        <td data-label="Username">{{ customer.user.username }}</td>
-                        <td data-label="Email">{{ customer.user.email }}</td>
+                        <td data-label="Username">{{ customer.username }}</td>
+                        <td data-label="Email">{{ customer.email }}</td>
                         <td data-label="Orders">
-                            {% with customer.order_set.count as order_count %}
-                                {{ order_count }} order{{ order_count|pluralize }}
-                            {% endwith %}
+                            {{ customer.order_count }} order{{ customer.order_count|pluralize }}
                         </td>
                         <td data-label="Last Purchase">
-                            {% with customer.order_set.first as last_order %}
-                                {% if last_order %}
-                                    {{ last_order.created_at|date:"M d, Y" }}
-                                {% else %}
-                                    Never
-                                {% endif %}
-                            {% endwith %}
+                            {% if customer.last_order_date %}
+                                {{ customer.last_order_date|date:"M d, Y" }}
+                            {% else %}
+                                Never
+                            {% endif %}
                         </td>
                         <td data-label="Actions">
                             <div class="action-btns">
@@ -781,15 +777,149 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // ========== SIDEBAR TOGGLE ==========
-            function toggleNav() {
-                const sidebar = document.getElementById('sidebar');
-                const burger = document.getElementById('burger');
-                sidebar.classList.toggle('active');
-                burger.classList.toggle('active');
-            }
+        // ========== GLOBAL FUNCTIONS ==========
+        function toggleNav() {
+            const sidebar = document.getElementById('sidebar');
+            const burger = document.getElementById('burger');
+            sidebar.classList.toggle('active');
+            burger.classList.toggle('active');
+        }
 
+        function searchCustomers() {
+            const searchBox = document.getElementById('searchBox');
+            const query = searchBox.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('.customer-table tbody tr');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('td:first-child span').textContent.toLowerCase();
+                const username = row.cells[1].textContent.toLowerCase();
+                const email = row.cells[2].textContent.toLowerCase();
+                
+                if (name.includes(query) || username.includes(query) || email.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function viewCustomer(customerId) {
+            // Implement view functionality
+            showToast(`Viewing customer ${customerId}`, 'info');
+            console.log('View customer:', customerId);
+            
+            // Redirect to customer detail page or show modal
+            window.location.href = `/customers/${customerId}/`;
+        }
+
+        function printCustomerTable() {
+            // Create a print-friendly version
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Customer List - {{ request.user.username }}'s Store</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        h1 { color: #704210; text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th { background-color: #704210; color: white; padding: 10px; text-align: left; }
+                        td { padding: 8px; border-bottom: 1px solid #ddd; }
+                        .footer { margin-top: 30px; text-align: right; font-size: 12px; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Customer List - {{ request.user.username }}'s Store</h1>
+                    <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Orders</th>
+                                <th>Last Purchase</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customers %}
+                            <tr>
+                                <td>{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
+                                <td>{{ customer.user.username }}</td>
+                                <td>{{ customer.user.email }}</td>
+                                <td>{{ customer.order_set.count }} order{{ customer.order_set.count|pluralize }}</td>
+                                <td>
+                                    {% with customer.order_set.first as last_order %}
+                                        {% if last_order %}
+                                            {{ last_order.created_at|date:"M d, Y" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        Printed from Escan System • {{ request.user.username }}
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            // Wait for content to load before printing
+            printWindow.onload = function() {
+                printWindow.print();
+                // printWindow.close(); // Uncomment to automatically close after printing
+            };
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                        type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            toast.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            if (type === 'error') {
+                toast.style.background = '#EF4444';
+            } else if (type === 'info') {
+                toast.style.background = '#3B82F6';
+            }
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after animation
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function setupResponsiveTable() {
+            if (window.innerWidth <= 768) {
+                const headers = document.querySelectorAll('.customer-table thead th');
+                const cells = document.querySelectorAll('.customer-table td');
+                
+                headers.forEach((header, index) => {
+                    const label = header.textContent;
+                    cells.forEach(cell => {
+                        if (cell.cellIndex === index) {
+                            cell.setAttribute('data-label', label);
+                        }
+                    });
+                });
+            }
+        }
+
+        // ========== DOM CONTENT LOADED ==========
+        document.addEventListener('DOMContentLoaded', function () {
             // Close sidebar when clicking outside
             document.addEventListener('click', function(event) {
                 const sidebar = document.getElementById('sidebar');
@@ -809,143 +939,7 @@
                 }
             });
 
-            function searchCustomers() {
-                const query = searchBox.value.trim().toLowerCase();
-                const rows = document.querySelectorAll('.customer-table tbody tr');
-                
-                rows.forEach(row => {
-                    const name = row.querySelector('td:first-child span').textContent.toLowerCase();
-                    const username = row.cells[1].textContent.toLowerCase();
-                    const email = row.cells[2].textContent.toLowerCase();
-                    
-                    if (name.includes(query) || username.includes(query) || email.includes(query)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-
-            // ========== CUSTOMER ACTIONS ==========
-            function viewCustomer(customerId) {
-                // Implement view functionality
-                showToast(`Viewing customer ${customerId}`, 'info');
-                console.log('View customer:', customerId);
-                
-                // Redirect to customer detail page or show modal
-                window.location.href = `/customers/${customerId}/`;
-            }
-
-            // ========== PRINT FUNCTIONALITY ==========
-            function printCustomerTable() {
-                // Create a print-friendly version
-                const printContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Customer List - {{ request.user.username }}'s Store</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; }
-                            h1 { color: #704210; text-align: center; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th { background-color: #704210; color: white; padding: 10px; text-align: left; }
-                            td { padding: 8px; border-bottom: 1px solid #ddd; }
-                            .footer { margin-top: 30px; text-align: right; font-size: 12px; color: #666; }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Customer List - {{ request.user.username }}'s Store</h1>
-                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Customer Name</th>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th>Orders</th>
-                                    <th>Last Purchase</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for customer in customers %}
-                                <tr>
-                                    <td>{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
-                                    <td>{{ customer.user.username }}</td>
-                                    <td>{{ customer.user.email }}</td>
-                                    <td>{{ customer.order_set.count }} order{{ customer.order_set.count|pluralize }}</td>
-                                    <td>
-                                        {% with customer.order_set.first as last_order %}
-                                            {% if last_order %}
-                                                {{ last_order.created_at|date:"M d, Y" }}
-                                            {% else %}
-                                                Never
-                                            {% endif %}
-                                        {% endwith %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <div class="footer">
-                            Printed from Escan System • {{ request.user.username }}
-                        </div>
-                    </body>
-                    </html>
-                `;
-                
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(printContent);
-                printWindow.document.close();
-                
-                // Wait for content to load before printing
-                printWindow.onload = function() {
-                    printWindow.print();
-                    // printWindow.close(); // Uncomment to automatically close after printing
-                };
-            }
-
-            // ========== TOAST NOTIFICATION FUNCTION ==========
-            function showToast(message, type) {
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                
-                const icon = type === 'success' ? 'fa-check-circle' : 
-                            type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-                toast.innerHTML = `
-                    <i class="fas ${icon}"></i>
-                    <span>${message}</span>
-                `;
-                
-                if (type === 'error') {
-                    toast.style.background = '#EF4444';
-                } else if (type === 'info') {
-                    toast.style.background = '#3B82F6';
-                }
-                
-                document.body.appendChild(toast);
-                
-                // Remove toast after animation
-                setTimeout(() => toast.remove(), 3000);
-            }
-
-            // Make table rows responsive
-            function setupResponsiveTable() {
-                if (window.innerWidth <= 768) {
-                    const headers = document.querySelectorAll('.customer-table thead th');
-                    const cells = document.querySelectorAll('.customer-table td');
-                    
-                    headers.forEach((header, index) => {
-                        const label = header.textContent;
-                        cells.forEach(cell => {
-                            if (cell.cellIndex === index) {
-                                cell.setAttribute('data-label', label);
-                            }
-                        });
-                    });
-                }
-            }
-
-            // Initialize on load and resize
+            // Initialize responsive table on load and resize
             setupResponsiveTable();
             window.addEventListener('resize', setupResponsiveTable);
         });

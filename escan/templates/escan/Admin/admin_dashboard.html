@@ -268,6 +268,7 @@
             margin: 15px 0;
             color: var(--light-brown);
             background: linear-gradient(to right, var(--gold), var(--bright-gold));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -457,9 +458,9 @@
             position: relative;
         }
 
-        .settings-icon:hover .settings-dropdown {
+        /* .settings-icon:hover .settings-dropdown {
             display: block;
-        }
+        } */
 
         /* Charts Section */
         .graphs-row {
@@ -1389,6 +1390,34 @@
             initializeDropdowns();
         });
         
+        // ========== HELPER FUNCTIONS ==========
+        function getJsonData(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.log(`Element ${elementId} not found`);
+                return null;
+            }
+            
+            try {
+                let data = JSON.parse(element.textContent);
+                
+                // Handle double-encoded JSON strings (e.g., when value was json.dumps'ed already)
+                if (typeof data === 'string') {
+                    const trimmed = data.trim();
+                    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+                        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                        data = JSON.parse(trimmed);
+                    }
+                }
+                
+                console.log(`Loaded ${elementId}:`, data);
+                return data;
+            } catch (error) {
+                console.log(`Error parsing ${elementId}:`, error);
+                return null;
+            }
+        }
+        
         function initializeAllCharts() {
             console.log("Initializing all charts...");
             
@@ -1434,16 +1463,17 @@
         function initializeStoreCharts() {
             // 1. Weekly Sales Chart
             const weeklySalesData = getJsonData('weekly-sales-data');
-            console.log("Weekly Sales Data:", weeklySalesData);
-            if (weeklySalesData && weeklySalesData.length > 0) {
-                const salesCtx = document.getElementById('salesChart').getContext('2d');
+            const salesCtx = getChartContext('salesChart');
+            if (!salesCtx) {
+                showNoDataMessage('salesChart', 'Chart unavailable');
+            } else if (weeklySalesData && weeklySalesData.length > 0) {
                 salesChart = new Chart(salesCtx, {
                     type: 'line',
                     data: {
-                        labels: weeklySalesData.map((item, index) => item[index].day || 'Day'),
+                        labels: weeklySalesData.map(item => item.day || item.date || 'Day'),
                         datasets: [{
                             label: 'Daily Sales (₱)',
-                            data: weeklySalesData.map(item => item.total_sales || 0),
+                            data: weeklySalesData.map(item => toNumber(item.total_sales)),
                             borderColor: '#DA9408',
                             backgroundColor: 'rgba(218, 148, 8, 0.1)',
                             borderWidth: 3,
@@ -1460,14 +1490,16 @@
                         yCallback: value => '₱' + value.toLocaleString()
                     })
                 });
-            } else {
+            } else if (!weeklySalesData || weeklySalesData.length === 0) {
                 showNoDataMessage('salesChart', 'No sales data available');
             }
             
             // 2. Order Status Chart
             const orderStatusData = getJsonData('order-status-data');
-            if (orderStatusData && orderStatusData.length > 0) {
-                const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+            const statusCtx = getChartContext('orderStatusChart');
+            if (!statusCtx) {
+                showNoDataMessage('orderStatusChart', 'Chart unavailable');
+            } else if (orderStatusData && orderStatusData.length > 0) {
                 const statusColors = {
                     'Pending': '#FFA726',
                     'On Process': '#42A5F5',
@@ -1497,7 +1529,7 @@
                         }
                     }
                 });
-            } else {
+            } else if (!orderStatusData || orderStatusData.length === 0) {
                 showNoDataMessage('orderStatusChart', 'No order data available');
             }
         }
@@ -1505,15 +1537,17 @@
         // ========== PURCHASE CHARTS ==========
         function initializePurchaseCharts() {
             const monthlyPurchases = getJsonData('monthly_purchases_json');
-            if (monthlyPurchases && monthlyPurchases.length > 0) {
-                const purchaseCtx = document.getElementById('monthlyPurchaseChart').getContext('2d');
+            const purchaseCtx = getChartContext('monthlyPurchaseChart');
+            if (!purchaseCtx) {
+                showNoDataMessage('monthlyPurchaseChart', 'Chart unavailable');
+            } else if (monthlyPurchases && monthlyPurchases.length > 0) {
                 monthlyPurchaseChart = new Chart(purchaseCtx, {
                     type: 'bar',
                     data: {
                         labels: monthlyPurchases.map(item => item.month_label || item.month || 'Month'),
                         datasets: [{
                             label: 'Amount Spent (₱)',
-                            data: monthlyPurchases.map(item => item.total_amount || 0),
+                            data: monthlyPurchases.map(item => toNumber(item.total_amount)),
                             backgroundColor: 'rgba(33, 150, 243, 0.7)',
                             borderColor: 'rgba(33, 150, 243, 1)',
                             borderWidth: 2,
@@ -1525,7 +1559,7 @@
                         yCallback: value => '₱' + value.toLocaleString()
                     })
                 });
-            } else {
+            } else if (!monthlyPurchases || monthlyPurchases.length === 0) {
                 showNoDataMessage('monthlyPurchaseChart', 'No purchase data available');
             }
         }
@@ -1534,8 +1568,10 @@
         function initializeUserCharts() {
             // 1. User Role Distribution
             const roleData = getJsonData('role_distribution_json');
-            if (roleData && roleData.length > 0) {
-                const roleCtx = document.getElementById('userRoleChart').getContext('2d');
+            const roleCtx = getChartContext('userRoleChart');
+            if (!roleCtx) {
+                showNoDataMessage('userRoleChart', 'Chart unavailable');
+            } else if (roleData && roleData.length > 0) {
                 const roleColors = {
                     'Farmer': '#4CAF50',
                     'Market-entity': '#2196F3',
@@ -1563,21 +1599,23 @@
                         }
                     }
                 });
-            } else {
+            } else if (!roleData || roleData.length === 0) {
                 showNoDataMessage('userRoleChart', 'No user data available');
             }
             
             // 2. User Registration Timeline
             const dailyRegistrations = getJsonData('daily_registrations_json');
-            if (dailyRegistrations && dailyRegistrations.length > 0) {
-                const regCtx = document.getElementById('userRegistrationChart').getContext('2d');
+            const regCtx = getChartContext('userRegistrationChart');
+            if (!regCtx) {
+                showNoDataMessage('userRegistrationChart', 'Chart unavailable');
+            } else if (dailyRegistrations && dailyRegistrations.length > 0) {
                 userRegistrationChart = new Chart(regCtx, {
                     type: 'bar',
                     data: {
                         labels: dailyRegistrations.map(item => item.date_label || item.date || 'Date'),
                         datasets: [{
                             label: 'Total Registrations',
-                            data: dailyRegistrations.map(item => item.count || 0),
+                            data: dailyRegistrations.map(item => toNumber(item.count)),
                             backgroundColor: 'rgba(76, 175, 80, 0.7)',
                             borderColor: 'rgba(76, 175, 80, 1)',
                             borderWidth: 1
@@ -1588,7 +1626,7 @@
                         yCallback: value => Math.round(value)
                     })
                 });
-            } else {
+            } else if (!dailyRegistrations || dailyRegistrations.length === 0) {
                 showNoDataMessage('userRegistrationChart', 'No registration data available');
             }
         }
@@ -1596,15 +1634,17 @@
         // ========== FARMER CHARTS ==========
         function initializeFarmerCharts() {
             const detectionActivity = getJsonData('daily_detection_activity_json');
-            if (detectionActivity && detectionActivity.length > 0) {
-                const detectionCtx = document.getElementById('detectionActivityChart').getContext('2d');
+            const detectionCtx = getChartContext('detectionActivityChart');
+            if (!detectionCtx) {
+                showNoDataMessage('detectionActivityChart', 'Chart unavailable');
+            } else if (detectionActivity && detectionActivity.length > 0) {
                 detectionActivityChart = new Chart(detectionCtx, {
                     type: 'line',
                     data: {
                         labels: detectionActivity.map(item => item.day || 'Day'),
                         datasets: [{
                             label: 'Total Scans',
-                            data: detectionActivity.map(item => item.total_scans || 0),
+                            data: detectionActivity.map(item => toNumber(item.total_scans)),
                             borderColor: '#EF5350',
                             backgroundColor: 'rgba(239, 83, 80, 0.1)',
                             borderWidth: 2,
@@ -1617,26 +1657,8 @@
                         yCallback: value => Math.round(value)
                     })
                 });
-            } else {
+            } else if (!detectionActivity || detectionActivity.length === 0) {
                 showNoDataMessage('detectionActivityChart', 'No detection data available');
-            }
-        }
-        
-        // ========== HELPER FUNCTIONS ==========
-        function getJsonData(elementId) {
-            const element = document.getElementById(elementId);
-            if (!element) {
-                console.log(`Element ${elementId} not found`);
-                return null;
-            }
-            
-            try {
-                const data = JSON.parse(element.textContent);
-                console.log(`Loaded ${elementId}:`, data);
-                return data;
-            } catch (error) {
-                console.log(`Error parsing ${elementId}:`, error);
-                return null;
             }
         }
         
@@ -1668,6 +1690,20 @@
                     }
                 }
             };
+        }
+
+        function getChartContext(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.warn(`Canvas element #${canvasId} not found`);
+                return null;
+            }
+            return canvas.getContext('2d');
+        }
+        
+        function toNumber(value) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : 0;
         }
         
         function showNoDataMessage(canvasId, message) {
@@ -1801,14 +1837,14 @@
             const settingsDropdown = settingsIcon?.querySelector('.settings-dropdown');
             
             if (settingsIcon && settingsDropdown) {
-                settingsIcon.addEventListener('mouseenter', function() {
+                settingsIcon.addEventListener('click', function() {
                     settingsDropdown.style.display = 'block';
-                });
-                
-                settingsIcon.addEventListener('mouseleave', function() {
-                    settingsDropdown.style.display = 'none';
+                }); 
+                settingsDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
                 });
             }
+
             
             // Message dropdown
             const messageIcon = document.getElementById('message-icon');

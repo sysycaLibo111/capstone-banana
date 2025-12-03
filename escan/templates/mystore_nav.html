@@ -712,28 +712,24 @@
                     <tr>
                         <td data-label="Customer">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <img src="{{ customer.user.image_url|default:'/static/img/default-profile.png' }}" 
-                                     alt="{{ customer.user.username }}" 
+                                <img src="{{ customer.image_url|default:'/static/img/default-profile.png' }}" 
+                                     alt="{{ customer.username }}" 
                                      class="customer-avatar"
                                      onerror="this.src='{% static 'img/default-profile.png' %}'">
-                                <span>{{ customer.user.first_name }} {{ customer.user.last_name }}</span>
+                                <span>{{ customer.first_name }} {{ customer.last_name }}</span>
                             </div>
                         </td>
-                        <td data-label="Username">{{ customer.user.username }}</td>
-                        <td data-label="Email">{{ customer.user.email }}</td>
+                        <td data-label="Username">{{ customer.username }}</td>
+                        <td data-label="Email">{{ customer.email }}</td>
                         <td data-label="Orders">
-                            {% with customer.order_set.count as order_count %}
-                                {{ order_count }} order{{ order_count|pluralize }}
-                            {% endwith %}
+                            {{ customer.order_count }} order{{ customer.order_count|pluralize }}
                         </td>
                         <td data-label="Last Purchase">
-                            {% with customer.order_set.first as last_order %}
-                                {% if last_order %}
-                                    {{ last_order.created_at|date:"M d, Y" }}
-                                {% else %}
-                                    Never
-                                {% endif %}
-                            {% endwith %}
+                            {% if customer.last_order_date %}
+                                {{ customer.last_order_date|date:"M d, Y" }}
+                            {% else %}
+                                Never
+                            {% endif %}
                         </td>
                         <td data-label="Actions">
                             <div class="action-btns">
@@ -845,18 +841,16 @@
                             <tbody>
                                 {% for customer in customers %}
                                 <tr>
-                                    <td>{{ customer.user.first_name }} {{ customer.user.last_name }}</td>
-                                    <td>{{ customer.user.username }}</td>
-                                    <td>{{ customer.user.email }}</td>
-                                    <td>{{ customer.order_set.count }} order{{ customer.order_set.count|pluralize }}</td>
+                                    <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+                                    <td>{{ customer.username }}</td>
+                                    <td>{{ customer.email }}</td>
+                                    <td>{{ customer.order_count }} order{{ customer.order_count|pluralize }}</td>
                                     <td>
-                                        {% with customer.order_set.first as last_order %}
-                                            {% if last_order %}
-                                                {{ last_order.created_at|date:"M d, Y" }}
-                                            {% else %}
-                                                Never
-                                            {% endif %}
-                                        {% endwith %}
+                                        {% if customer.last_order_date %}
+                                            {{ customer.last_order_date|date:"M d, Y" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

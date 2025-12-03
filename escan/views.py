@@ -685,31 +685,68 @@ def my_orders_part(request):
 def customer_detail(request, customer_id):
     try:
         store = Store.objects.get(owner=request.user)
-        customer = get_object_or_404(Customer, pk=customer_id, order__store=store)
         
-        # Get customer's order history for this store
+        # customer_id is actually a User ID coming from the customer_table view
+        # Get the User object
+        user = get_object_or_404(CustomUser, pk=customer_id)
+        
+        # Verify that this user has made purchases from this store
+        has_orders = Order.objects.filter(store=store, customer=user).exists()
+        
+        # Try to get or create the Customer object for this user
+        try:
+            customer = Customer.objects.get(user=user)
+        except Customer.DoesNotExist:
+            # Create a Customer object if it doesn't exist
+            customer = Customer.objects.create(user=user)
+        
+        has_purchases = CustomerPurchase.objects.filter(customer=customer, store=store).exists()
+        
+        # If the user hasn't made any purchases from this store, redirect back
+        if not has_orders and not has_purchases:
+            messages.warning(request, 'This customer has not made any purchases from your store.')
+            return redirect('customer_table')
+        
+        # Get customer's order history for this store (orders are linked to User, not Customer)
+        # Show all orders, not just completed ones
         orders = Order.objects.filter(
             store=store, 
-            customer=customer,
-            status="Completed"
+            customer=user
         ).order_by('-order_date')
         
+        # Get customer purchases for this store
+        # Show all purchases, not just completed ones
+        purchases = CustomerPurchase.objects.filter(
+            customer=customer,
+            store=store
+        ).order_by('-purchase_date')
+        
         # Calculate customer metrics
-        total_spent = orders.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_spent_orders = orders.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_spent_purchases = purchases.aggregate(total=Sum('total_amount'))['total'] or 0
+        total_spent = total_spent_orders + total_spent_purchases
+        
         order_count = orders.count()
-        avg_order_value = total_spent / order_count if order_count > 0 else 0
+        purchase_count = purchases.count()
+        total_transactions = order_count + purchase_count
+        
+        avg_order_value = total_spent / total_transactions if total_transactions > 0 else 0
         
         context = {
             'customer': customer,
             'orders': orders,
+            'purchases': purchases,
             'total_spent': total_spent,
             'order_count': order_count,
+            'purchase_count': purchase_count,
+            'total_transactions': total_transactions,
             'avg_order_value': avg_order_value,
         }
         
         return render(request, 'escan/Market_Entity/E-commerce/MyStore/customer_detail.html', context)
         
     except Store.DoesNotExist:
+        messages.error(request, 'You need to have a store to view customer details.')
         return redirect('my_store_dashboard')
     
 # Market Entity Customer List
@@ -793,11 +830,13 @@ def u_customer_table(request):
     try:
         store = Store.objects.get(owner=request.user)
         
-        # Get all completed orders for this store
+        # Get all completed orders for this store, excluding orders from the logged-in user
+        
         completed_orders = Order.objects.filter(
-            store=store, 
-            status="Completed"
-        ).select_related('customer')
+            status="Completed",
+            store=store,
+        ).exclude(customer=request.user)
+
         
         # Create a dictionary to track unique customers and their data
         customer_dict = {}
@@ -4106,9 +4145,9 @@ def admin_dashboard(request):
             'completed_orders': completed_orders,
             'pending_orders': pending_orders,
             'weekly_sales_data': weekly_sales_data,
-            'weekly_sales_json': json.dumps(weekly_sales_data),
+            'weekly_sales_json': weekly_sales_data,
             'order_status_data': order_status_data,
-            'order_status_json': json.dumps(order_status_data),
+            'order_status_json': order_status_data,
             'top_products': top_products,
         })
 
@@ -4166,7 +4205,7 @@ def admin_dashboard(request):
         'total_purchase_amount': total_purchase_amount,
         'unique_stores_count': unique_stores_count,
         'unique_products_count': unique_products_count,
-        'monthly_purchases_json': json.dumps(monthly_purchase_list),
+            'monthly_purchases_json': monthly_purchase_list,
     })
 
     # ========== USER VISUALIZATION ==========
@@ -4206,8 +4245,8 @@ def admin_dashboard(request):
 
     context.update({
         'role_distribution': role_distribution,
-        'role_distribution_json': json.dumps(role_distribution),
-        'daily_registrations_json': json.dumps(daily_registration_list),
+            'role_distribution_json': role_distribution,
+            'daily_registrations_json': daily_registration_list,
         'farmers_count': non_admin_users.filter(role='Farmer').count(),
         'market_entities_count': non_admin_users.filter(role='Market-entity').count(),
     })
@@ -4286,7 +4325,7 @@ def admin_dashboard(request):
         'total_farmers': total_farmers,
         'active_farmers': active_farmers,
         'total_detections': total_detections,
-        'daily_detection_activity_json': json.dumps(daily_activity_list),
+            'daily_detection_activity_json': daily_activity_list,
         'top_farmers': top_farmers_data,
         'detection_summary': detection_summary
     })
@@ -5523,11 +5562,40 @@ def customer_table(request):
         store = Store.objects.get(owner=request.user)
         
         # Get all orders for this store
-        store_orders = Order.objects.filter(store=store)
+        completed_orders =  Order.objects.filter(store=store, status="Completed").exclude(customer=request.user)
         
-        # Get all customers who placed these orders
-        customer_ids = store_orders.values_list('customer', flat=True).distinct()
-        customers = Customer.objects.filter(id__in=customer_ids).select_related('user')
+        customer_dict = {}
+        
+        for order in completed_orders:
+            customer = order.customer
+            
+            if customer.id not in customer_dict:
+                customer_dict[customer.id] = {
+                    'customer': customer,
+                    'order_count': 0,
+                    'total_spent': 0,
+                    'last_order_date': None
+                }
+            
+            data = customer_dict[customer.id]
+            data['order_count'] += 1
+            data['total_spent'] += float(order.total_amount or 0)
+            
+            if not data['last_order_date'] or order.order_date > data['last_order_date']:
+                data['last_order_date'] = order.order_date
+        
+        # Convert to list and calculate averages
+        customers = []
+        for data in customer_dict.values():
+            customer = data['customer']
+            customer.order_count = data['order_count']
+            customer.total_spent = data['total_spent']
+            customer.last_order_date = data['last_order_date']
+            customer.avg_order_value = data['total_spent'] / data['order_count'] if data['order_count'] > 0 else 0
+            customers.append(customer)
+        
+        # Sort by last order date (most recent first)
+        customers.sort(key=lambda x: x.last_order_date or datetime.min, reverse=True)
         
     except Store.DoesNotExist:
         # If the user doesn't have a store, return empty queryset
@@ -5961,17 +6029,6 @@ def add_product(request):
             try:
                 product = form.save(commit=False)
                 product.store = request.user.store
-                
-                # Handle image upload
-                if 'image' in request.FILES:
-                    image_file = request.FILES['image']
-                    # Generate unique filename
-                    ext = os.path.splitext(image_file.name)[1]
-                    filename = f"{uuid.uuid4()}{ext}"
-                    # Save the file
-                    file_path = default_storage.save(f'products/{filename}', image_file)
-                    product.image = file_path
-                
                 product.save()
                 
                 # Save action for undo functionality
@@ -5985,7 +6042,7 @@ def add_product(request):
                         'description': product.description,
                         'price': product.price,
                         'stock': product.stock,
-                        'image': product.image.url if product.image else None
+                        'image_url': str(product.image_url) if product.image_url else None
                     }
                 }
                 
@@ -6010,24 +6067,24 @@ def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id, store=request.user.store)
     
     if request.method == 'POST':
+        # Save previous data for undo functionality BEFORE applying changes
+        global last_action
+        last_action = {
+            'type': 'edit',
+            'product_id': product.id,
+            'previous_data': {
+                'name': product.name,
+                'category': product.category.id if product.category else None,
+                'description': product.description,
+                'price': str(product.price),
+                'stock': product.stock,
+                'image_url': str(product.image_url) if product.image_url else None
+            }
+        }
+        
         form = ProductForm(request.POST, request.FILES, instance=product, request=request)
         if form.is_valid():
             try:
-                # Save previous data for undo functionality
-                global last_action
-                last_action = {
-                    'type': 'edit',
-                    'product_id': product.id,
-                    'previous_data': {
-                        'name': product.name,
-                        'category': product.category.id if product.category else None,
-                        'description': product.description,
-                        'price': product.price,
-                        'stock': product.stock,
-                        'image_url': product.image_url
-                    }
-                }
-                
                 form.save()
                 messages.success(request, "Product updated successfully!")
                 return redirect('product_list')
@@ -6070,10 +6127,10 @@ def undo_last_action(request):
         if last_action['type'] == 'delete':
             product = last_action['product']
             product.restore()
-            message = "Product restoration successful"
+            message = "Product restored successfully"
         elif last_action['type'] == 'add':
-            Product.objects.filter(id=last_action['product_id']).delete()
-            message = "Product creation undone"
+            Product.objects.filter(id=last_action['product_id']).update(is_deleted=True)
+            message = "Product addition undone"
         elif last_action['type'] == 'edit':
             product = Product.objects.get(id=last_action['product_id'])
             previous_data = last_action['previous_data']
@@ -6082,9 +6139,10 @@ def undo_last_action(request):
             product.description = previous_data['description']
             product.price = previous_data['price']
             product.stock = previous_data['stock']
-            product.image_url = previous_data['image_url']
+            if previous_data['image_url']:
+                product.image_url = previous_data['image_url']
             product.save()
-            message = "Product edit undone"
+            message = "Product changes undone"
         
         last_action = None
         messages.success(request, message)

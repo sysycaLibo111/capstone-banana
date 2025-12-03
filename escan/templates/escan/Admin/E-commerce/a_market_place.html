@@ -768,9 +768,26 @@
     </div>
   </div>
 </div>
-{% endblock %}
- {% block extra_js %}
-    <script>
+
+<script>
+        // ========== CSRF TOKEN UTILITY ==========
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+
         document.addEventListener('DOMContentLoaded', function () {
             // ========== QUANTITY INPUT HANDLERS ==========
             const quantityInputs = document.querySelectorAll('.quantity-input');
@@ -793,12 +810,19 @@
 
             // ========== ADD TO CART FUNCTIONALITY ==========
             const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            console.log('Found add to cart buttons:', addToCartButtons.length);
+            
             addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Add to cart button clicked');
+                    
                     const productId = this.getAttribute('data-product');
                     const quantityInput = this.closest('.product-actions').querySelector('.quantity-input');
                     const quantity = parseInt(quantityInput.value) || 1;
                     const button = this;
+
+                    console.log('Product ID:', productId, 'Quantity:', quantity);
 
                     // Validate quantity
                     const maxStock = parseInt(quantityInput.max);
@@ -816,20 +840,25 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-CSRFToken': csrftoken,
                         },
                         body: JSON.stringify({ quantity: quantity })
                     })
                     .then(response => {
+                        console.log('Response status:', response.status);
                         if (!response.ok) {
                             return response.json().then(err => Promise.reject(err));
                         }
                         return response.json();
                     })
                     .then(data => {
+                        console.log('Response data:', data);
                         if (data.success) {
                             // Update cart count
-                            document.querySelector('.cart-item-count').textContent = data.item_count;
+                            const cartCount = document.querySelector('.cart-item-count');
+                            if (cartCount) {
+                                cartCount.textContent = data.item_count;
+                            }
                             
                             // Show success message
                             showToast(data.message, 'success');
@@ -851,12 +880,19 @@
 
             // ========== BUY NOW FUNCTIONALITY ==========
             const buyNowButtons = document.querySelectorAll('.buy-now');
+            console.log('Found buy now buttons:', buyNowButtons.length);
+            
             buyNowButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Buy now button clicked');
+                    
                     const productId = this.getAttribute('data-product');
                     const storeId = this.getAttribute('data-store');
                     const quantityInput = this.closest('.product-actions').querySelector('.quantity-input');
                     const quantity = parseInt(quantityInput.value) || 1;
+                    
+                    console.log('Product ID:', productId, 'Store ID:', storeId, 'Quantity:', quantity);
                     
                     // Validate quantity
                     const maxStock = parseInt(quantityInput.max);
@@ -895,38 +931,24 @@
                 setTimeout(() => toast.remove(), 3000);
             }
 
-            // ========== SIDEBAR TOGGLE ==========
-            function toggleNav() {
-                const sidebar = document.querySelector('.sidebar');
-                const burger = document.getElementById('burger');
-                sidebar.classList.toggle('active');
-                burger.classList.toggle('active');
-            }
-
-            // Close sidebar when clicking outside
-            document.addEventListener('click', function(event) {
-                const sidebar = document.querySelector('.sidebar');
-                const burger = document.getElementById('burger');
-                
-                if (!sidebar.contains(event.target) && !burger.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                    burger.classList.remove('active');
-                }
-            });
-
             // ========== SETTINGS DROPDOWN ==========
             const settingsIcon = document.getElementById('settings-icon');
             if (settingsIcon) {
                 settingsIcon.addEventListener('click', function(e) {
                     e.stopPropagation();
                     const dropdown = this.querySelector('.settings-dropdown');
-                    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                    if (dropdown) {
+                        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                    }
                 });
 
                 // Prevent dropdown from closing when clicking inside
-                document.querySelector('.settings-dropdown').addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
+                const settingsDropdown = document.querySelector('.settings-dropdown');
+                if (settingsDropdown) {
+                    settingsDropdown.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
+                }
             }
 
             // Close dropdowns when clicking outside
@@ -990,5 +1012,6 @@
     });
   }
 });
-    </script>
+</script>
+
 {% endblock %}

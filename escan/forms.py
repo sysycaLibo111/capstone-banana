@@ -1,5 +1,5 @@
 from django import forms
-from jsonschema import ValidationError
+from fastjsonschema import JsonSchemaException
 from .models import  Store, Category, Product, CustomUser, ShippingAddress, StoreValidation
 from .supabase_helper import upload_image_to_supabase
 import logging
