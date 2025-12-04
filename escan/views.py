@@ -502,29 +502,79 @@ def user_logout(request):
     return redirect('login')  # Redirect to login page after logout
 
 # SignUp
+# def signup_view(request):
+#     if request.method == "POST":
+#         form = UserProfileForm(request.POST, request.FILES)  # Use the form to handle POST data
+#         if form.is_valid():
+#             # Check if username or email already exists
+#             username = form.cleaned_data['username']
+#             email = form.cleaned_data['email']
+#             if CustomUser .objects.filter(username=username).exists():
+#                 messages.error(request, "Username is already taken.")
+#                 return redirect("signup_view")
+#             if CustomUser .objects.filter(email=email).exists():
+#                 messages.error(request, "Email is already registered.")
+#                 return redirect("signup_view")
+#             # Save the user
+#             form.save()
+#             messages.success(request, "Account created successfully! Please log in.")
+#             return redirect("login")  # Redirect to the login page after successful signup
+#         else:
+#             messages.error(request, "Form is invalid. Please correct the errors.")
+#     else:
+#         form = UserProfileForm()  # Create an empty form instance
+#     return render(request, "signup.html", {'form': form})
 def signup_view(request):
     if request.method == "POST":
-        form = UserProfileForm(request.POST, request.FILES)  # Use the form to handle POST data
+        # DEBUG: Print the raw data coming from the HTML
+        print("--- DEBUG START ---")
+        print("POST Data received:", request.POST)
+        print("FILES Data received:", request.FILES)
+
+        form = UserProfileForm(request.POST, request.FILES)
+
         if form.is_valid():
-            # Check if username or email already exists
+            # Check for existing user manually (optional, but good for custom error messages)
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
-            if CustomUser .objects.filter(username=username).exists():
-                messages.error(request, "Username is already taken.")
-                return redirect("signup_view")
-            if CustomUser .objects.filter(email=email).exists():
-                messages.error(request, "Email is already registered.")
-                return redirect("signup_view")
-            # Save the user
-            form.save()
-            messages.success(request, "Account created successfully! Please log in.")
-            return redirect("login")  # Redirect to the login page after successful signup
-        else:
-            messages.error(request, "Form is invalid. Please correct the errors.")
-    else:
-        form = UserProfileForm()  # Create an empty form instance
-    return render(request, "signup.html", {'form': form})
+            password = form.cleaned_data['password'] # Get the clear text password
 
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, "Username is already taken.")
+                print("Error: Username taken") # Debug
+                return render(request, "signup.html", {'form': form})
+            
+            if CustomUser.objects.filter(email=email).exists():
+                messages.error(request, "Email is already registered.")
+                print("Error: Email taken") # Debug
+                return render(request, "signup.html", {'form': form})
+
+            # CRITICAL FIX: Password Hashing
+            # You must save with commit=False, set the password, then save.
+            user = form.save(commit=False)
+            user.set_password(password) # This encrypts the password
+            user.save()
+            
+            print("--- SUCCESS: User Created ---")
+            messages.success(request, "Account created successfully! Please log in.")
+            return redirect("login")
+
+        else:
+            # DEBUG: This prints the exact reason why it failed to your terminal
+            print("--- FORM VALIDATION FAILED ---")
+            print(form.errors) 
+            
+            # Show specific errors to the user on the screen
+            messages.error(request, "Registration failed. See errors below:")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    # Example: "Email: Enter a valid email address."
+                    messages.error(request, f"{field}: {error}")
+                    
+    else:
+        form = UserProfileForm()
+
+    return render(request, "signup.html", {'form': form})
 
 
 

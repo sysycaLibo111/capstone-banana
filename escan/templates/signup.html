@@ -1,5 +1,4 @@
 {% load static %}
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
   <title>Sign Up - BANAeScan</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
   <style>
+    /* 1. ADOPTED VARIABLES FROM NEW STYLE */
     :root {
       --dark-brown: #2F1609;
       --medium-brown: #704210;
@@ -17,9 +17,8 @@
       --bright-gold: #FBD242;
       --white: #FFFFFF;
       --light-bg: #FFF9EC;
-      --container-padding-mobile: 1.5rem;
-      --container-padding-tablet: 2rem;
-      --container-padding-desktop: 2.5rem;
+      --surface: #FFFCF4;
+      --shadow-lg: 0 15px 35px rgba(0,0,0,0.25);
     }
 
     * {
@@ -30,28 +29,32 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--light-bg);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-image: url("{% static 'img/bc1.png' %}");
+      /* Matches Login Page Background */
+      background: linear-gradient(135deg, rgba(47, 22, 9, 0.8), rgba(112, 66, 16, 0.7)), url("{% static 'img/bc1.png' %}");
       background-size: cover;
       background-position: center;
-      padding: 1rem;
+      background-attachment: fixed;
+      padding: 20px;
+      color: var(--dark-brown);
     }
 
+    /* GLASSMORPHISM CONTAINER */
     .signup-container {
       width: 100%;
-      max-width: 500px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(47, 22, 9, 0.3);
-      padding: var(--container-padding-mobile);
+      max-width: 500px; /* Slightly wider than login for better form spacing */
+      background: rgba(255, 252, 244, 0.95);
+      border: 1px solid rgba(251, 210, 66, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      padding: 30px;
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(251, 213, 118, 0.3);
       animation: fadeIn 0.6s ease-out;
     }
 
@@ -61,96 +64,171 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: linear-gradient(to right, var(--gold), var(--bright-gold));
     }
 
+    /* UTILITIES: Top Controls */
+    .top-controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+    }
+
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(112, 66, 16, 0.2);
+      background: rgba(255,255,255,0.5);
+      color: var(--medium-brown);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .close-btn:hover {
+        background: var(--bright-gold);
+        border-color: var(--bright-gold);
+        color: var(--dark-brown);
+    }
+
+    .language-select {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--gold);
+      background: rgba(255,255,255,0.8);
+      color: var(--dark-brown);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* LOGO & TITLE */
     .logo-container {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 20px;
     }
 
     .logo {
-      width: 100px;
-      height: 100px;
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
       border: 3px solid var(--bright-gold);
       object-fit: cover;
-      box-shadow: 0 4px 15px rgba(218, 148, 8, 0.3);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      background: var(--white);
+      padding: 4px;
     }
 
     .form-title {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 26px;
+      font-weight: 800;
       color: var(--medium-brown);
       text-align: center;
-      margin-bottom: 1.5rem;
-      position: relative;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
     }
 
-    .form-title::after {
-      content: '';
-      position: absolute;
-      bottom: -0.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(to right, var(--gold), var(--bright-gold));
-      border-radius: 3px;
-    }
-
+    /* FORM INPUTS */
     .input-group {
-      margin-bottom: 1.25rem;
+      margin-bottom: 16px;
       position: relative;
     }
 
-    .input-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: var(--medium-brown);
-      font-weight: 500;
-      font-size: 0.9rem;
+    /* Hide default labels visually but keep for accessibility/logic if needed, 
+       or style them if you prefer labels over placeholders. 
+       Here we stick to placeholders for cleaner look matching Login. */
+    .input-group label.field-label {
+        display: none; 
     }
 
-    .input-group input, .input-group select {
+    .input-group input, 
+    .input-group select {
       width: 100%;
-      padding: 0.875rem 1rem;
-      font-size: 1rem;
-      border: 2px solid rgba(112, 66, 16, 0.2);
-      border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.8);
-      transition: all 0.3s ease;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-family: inherit;
       color: var(--dark-brown);
+      background-color: var(--white);
+      border: 1px solid rgba(112, 66, 16, 0.2);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      appearance: none; /* For custom select arrow */
     }
 
-    .input-group input:focus, .input-group select:focus {
+    .input-group input:focus, 
+    .input-group select:focus {
       border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.2);
+      box-shadow: 0 0 0 4px rgba(218, 148, 8, 0.15);
       outline: none;
+      transform: translateY(-2px);
     }
 
-    .input-group input::placeholder {
-      color: rgba(112, 66, 16, 0.5);
-    }
-
-    .input-group i {
+    /* Select Arrow Styling */
+    .select-wrapper { position: relative; }
+    .select-wrapper::after {
+      content: '\f078';
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
       position: absolute;
-      right: 1rem;
+      right: 20px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--gold);
-      font-size: 1rem;
+      pointer-events: none;
+      font-size: 14px;
     }
 
-    /* Password strength meter styles */
+    /* FILE INPUT STYLING */
+    .file-input-label {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      border: 1px dashed var(--gold);
+      border-radius: 12px;
+      text-align: center;
+      color: var(--medium-brown);
+      background-color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .file-input-label:hover {
+      background-color: rgba(251, 210, 66, 0.1);
+      border-color: var(--dark-brown);
+      transform: translateY(-2px);
+    }
+    
+    .file-input input[type="file"] {
+        display: none;
+    }
+
+    /* PASSWORD STRENGTH */
+    .password-strength-container {
+        margin-top: 8px;
+        background: rgba(255,255,255,0.5);
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(112, 66, 16, 0.1);
+    }
+
     .password-strength-meter {
       width: 100%;
       height: 6px;
-      background-color: rgba(112, 66, 16, 0.2);
+      background-color: rgba(112, 66, 16, 0.1);
       border-radius: 3px;
-      margin-top: 0.5rem;
       overflow: hidden;
+      margin-bottom: 8px;
     }
 
     .password-strength-bar {
@@ -160,402 +238,146 @@
       border-radius: 3px;
     }
 
-    .password-requirements {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      background: rgba(251, 213, 118, 0.1);
-      border-radius: 6px;
-      border-left: 4px solid var(--gold);
-      font-size: 0.8rem;
-    }
-
     .requirement {
       display: flex;
       align-items: center;
-      font-size: 0.75rem;
-      margin-bottom: 0.25rem;
-      color: var(--medium-brown);
-      transition: all 0.3s ease;
-    }
-
-    .requirement:last-child {
-      margin-bottom: 0;
+      font-size: 12px;
+      margin-bottom: 2px;
+      color: var(--light-brown);
+      font-weight: 600;
     }
 
     .requirement i {
-      font-size: 0.5rem;
-      margin-right: 0.5rem;
-      position: static;
-      transform: none;
+      font-size: 8px;
+      margin-right: 6px;
     }
 
-    .requirement.unmet {
-      color: #dc3545;
-    }
+    .requirement.met { color: #27ae60; }
+    .requirement.unmet { color: #e74c3c; }
 
-    .requirement.unmet i {
-      color: #dc3545;
-    }
-
-    .requirement.met {
-      color: #28a745;
-    }
-
-    .requirement.met i {
-      color: #28a745;
-    }
-
-    .file-input {
-      position: relative;
-      margin-top: 0.25rem;
-    }
-
-    .file-input input[type="file"] {
-      position: absolute;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      cursor: pointer;
-    }
-
-    .file-input-label {
-      display: block;
-      padding: 0.875rem 1rem;
-      font-size: 0.9rem;
-      border: 2px dashed rgba(112, 66, 16, 0.3);
-      border-radius: 8px;
-      text-align: center;
-      color: var(--medium-brown);
-      transition: all 0.3s;
-      background-color: rgba(255, 255, 255, 0.8);
-    }
-
-    .file-input-label:hover {
-      border-color: var(--gold);
-      background-color: rgba(251, 213, 118, 0.1);
-    }
-
+    /* BUTTON */
     .btn {
       width: 100%;
-      padding: 0.875rem;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       border: none;
-      border-radius: 8px;
-      color: var(--white);
-      background: linear-gradient(to right, var(--gold), var(--bright-gold));
+      border-radius: 12px;
+      color: var(--dark-brown);
+      background: linear-gradient(135deg, var(--gold), var(--bright-gold));
       cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 0.5rem;
-      box-shadow: 0 4px 15px rgba(218, 148, 8, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 20px rgba(218, 148, 8, 0.3);
+      margin-top: 20px;
+      text-transform: uppercase;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(218, 148, 8, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(218, 148, 8, 0.4);
     }
 
     .btn:disabled {
-      background: rgba(112, 66, 16, 0.3);
+      background: #ccc;
+      color: #888;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
 
+    /* FOOTER LINKS */
     .separator {
       display: flex;
       align-items: center;
-      margin: 1.5rem 0;
-      color: var(--medium-brown);
+      margin: 20px 0;
+      color: var(--light-brown);
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    .separator::before,
-    .separator::after {
+    .separator::before, .separator::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      background: rgba(218, 148, 8, 0.3);
     }
 
-    .separator span {
-      padding: 0 0.75rem;
-      font-size: 0.875rem;
-    }
+    .separator span { padding: 0 15px; }
 
     .login-text {
       text-align: center;
       color: var(--medium-brown);
-      margin-top: 1.25rem;
-      font-size: 0.875rem;
+      font-size: 15px;
     }
 
     .login-text a {
-      color: var(--gold);
-      font-weight: 600;
+      color: var(--dark-brown);
+      font-weight: 700;
       text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .login-text a:hover {
-      color: var(--light-brown);
-      text-decoration: underline;
-    }
-
-    .language-selector {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      z-index: 10;
-    }
-
-    .language-selector select {
-      padding: 0.5rem 0.75rem;
-      border-radius: 20px;
-      border: 1px solid var(--gold);
-      background-color: var(--white);
-      color: var(--medium-brown);
-      font-size: 0.875rem;
-      cursor: pointer;
+      border-bottom: 2px solid var(--gold);
       transition: all 0.3s;
     }
 
-    .language-selector select:hover {
-      border-color: var(--light-brown);
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      color: var(--medium-brown);
-      cursor: pointer;
-      transition: color 0.3s;
-      z-index: 10;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .close-btn:hover {
+    .login-text a:hover {
       color: var(--gold);
+      border-color: transparent;
     }
 
-    .message-container {
-      margin-bottom: 1rem;
-      text-align: center;
+    /* MESSAGES */
+    .message-container { margin-bottom: 15px; }
+    .error-message, .info-message {
+        padding: 10px; border-radius: 8px; font-size: 14px;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-
-    .error-message {
-      color: #dc3545;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .info-message {
-      color: #28a745;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
+    .error-message { background: rgba(220, 53, 69, 0.1); color: #d63031; border: 1px solid rgba(220, 53, 69, 0.2); }
+    .info-message { background: rgba(40, 167, 69, 0.1); color: #218838; border: 1px solid rgba(40, 167, 69, 0.2); }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Tablet and larger mobile devices */
-    @media (min-width: 481px) {
-      .signup-container {
-        padding: var(--container-padding-tablet);
-      }
-      
-      .logo {
-        width: 110px;
-        height: 110px;
-      }
-      
-      .form-title {
-        font-size: 1.75rem;
-      }
-      
-      .input-group label {
-        font-size: 0.95rem;
-      }
-      
-      .password-requirements {
-        font-size: 0.85rem;
-      }
-      
-      .requirement {
-        font-size: 0.8rem;
-      }
+    /* --- RESPONSIVE MOBILE STYLES --- */
+    @media (max-width: 600px) {
+        .signup-container { padding: 25px 20px; margin-top: 40px; }
+        .form-title { font-size: 24px; margin-bottom: 20px; }
+        .logo { width: 80px; height: 80px; }
+        .input-group input, .input-group select { padding: 12px 16px; }
     }
 
-    /* Small tablets */
-    @media (min-width: 641px) {
-      body {
-        padding: 1.5rem;
-      }
-      
-      .signup-container {
-        padding: var(--container-padding-desktop);
-      }
-      
-      .logo {
-        width: 120px;
-        height: 120px;
-      }
-      
-      .form-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-      }
-      
-      .input-group {
-        margin-bottom: 1.5rem;
-      }
-      
-      .input-group input,
-      .input-group select {
-        padding: 1rem 1.25rem;
-        font-size: 1.05rem;
-      }
-      
-      .input-group label {
-        font-size: 1rem;
-        margin-bottom: 0.75rem;
-      }
-      
-      .btn {
-        padding: 1rem;
-        font-size: 1.1rem;
-      }
-      
-      .password-requirements {
-        padding: 1rem;
-        font-size: 0.9rem;
-      }
-      
-      .requirement {
-        font-size: 0.85rem;
-        margin-bottom: 0.5rem;
-      }
+    @media (max-width: 380px) {
+        .signup-container { padding: 20px 15px; }
+        .logo { width: 70px; height: 70px; margin-bottom: 15px; }
+        .form-title { font-size: 22px; margin-bottom: 15px; }
+        .top-controls { top: 15px; left: 15px; right: 15px; }
+        .close-btn { width: 32px; height: 32px; font-size: 14px; }
+        .language-select { padding: 4px 10px; font-size: 12px; }
     }
 
-    /* Desktop and larger tablets */
-    @media (min-width: 1025px) {
-      .signup-container {
-        max-width: 550px;
-      }
-      
-      .logo {
-        width: 130px;
-        height: 130px;
-      }
-      
-      .form-title {
-        font-size: 2.25rem;
-      }
-    }
-
-    /* Very small mobile devices */
-    @media (max-width: 360px) {
-      .signup-container {
-        padding: 1.25rem;
-      }
-      
-      .logo {
-        width: 90px;
-        height: 90px;
-      }
-      
-      .form-title {
-        font-size: 1.35rem;
-      }
-      
-      .input-group input,
-      .input-group select {
-        padding: 0.75rem;
-      }
-      
-      .language-selector, .close-btn {
-        top: 0.75rem;
-      }
-      
-      .language-selector {
-        right: 0.75rem;
-      }
-      
-      .close-btn {
-        left: 0.75rem;
-      }
-      
-      .password-requirements {
-        padding: 0.5rem;
-      }
-    }
-
-    /* Landscape orientation for mobile */
-    @media (max-height: 600px) and (orientation: landscape) {
-      body {
-        align-items: flex-start;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-      }
-      
-      .signup-container {
-        overflow-y: auto;
-        max-height: 95vh;
-      }
-      
-      .logo-container {
-        margin-bottom: 1rem;
-      }
-      
-      .logo {
-        width: 80px;
-        height: 80px;
-      }
-      
-      .form-title {
-        margin-bottom: 1rem;
-      }
-      
-      .input-group {
-        margin-bottom: 1rem;
-      }
+    /* LANDSCAPE MODE FIX */
+    @media (max-height: 700px) {
+        body { padding: 10px; align-items: flex-start; overflow-y: auto; }
+        .signup-container { margin: 20px auto; overflow-y: visible; animation: none; }
     }
   </style>
 </head>
 <body>
   <div class="signup-container">
-    <button class="close-btn" onclick="window.location.href='{% url 'landing_page' %}'" aria-label="Close">
-      <i class="fas fa-times"></i>
-    </button>
+    
+    <div class="top-controls">
+        <button class="close-btn" onclick="window.location.href='{% url 'landing_page' %}'" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
 
-    <div class="language-selector">
-      <select id="languageSelect" onchange="changeLanguage()">
-        <option value="en">English</option>
-        <option value="ph">Tagalog</option>
-      </select>
+        <select id="languageSelect" class="language-select" onchange="changeLanguage()">
+          <option value="en">English</option>
+          <option value="ph">Tagalog</option>
+        </select>
     </div>
 
     <div class="logo-container">
-      <img src="{% static 'img/LogoW.png' %}" alt="BANAeScan Logo" class="logo">
+      <img src="{% static 'img/LogoW.png' %}" alt="Logo" class="logo">
     </div>
 
     <h1 class="form-title" id="formTitle">Sign Up</h1>
@@ -564,13 +386,9 @@
       <div class="message-container">
         {% for message in messages %} 
           {% if message.tags == 'error' %}
-            <div class="error-message">
-              <i class="fas fa-exclamation-circle"></i> {{ message }}
-            </div>
+            <div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ message }}</div>
           {% else %}
-            <div class="info-message">
-              <i class="fas fa-check-circle"></i> {{ message }}
-            </div>
+            <div class="info-message"><i class="fas fa-check-circle"></i> {{ message }}</div>
           {% endif %}
         {% endfor %}
       </div>
@@ -578,6 +396,7 @@
 
     <form method="POST" enctype="multipart/form-data" id="signupForm">
       {% csrf_token %}
+      
       <div class="input-group">
         <input type="text" name="first_name" placeholder="First Name" id="firstName" required aria-label="First Name">
       </div>
@@ -596,44 +415,36 @@
       
       <div class="input-group">
         <input type="password" name="password" placeholder="Password" id="password" required aria-label="Password">
-        <div class="password-strength-meter">
-          <div class="password-strength-bar" id="passwordStrengthBar"></div>
-        </div>
-        <div class="password-requirements" id="passwordRequirements">
-          <div class="requirement unmet" id="reqLength">
-            <i class="fas fa-circle"></i> <span id="reqLengthText">At least 8 characters</span>
-          </div>
-          <div class="requirement unmet" id="reqLowercase">
-            <i class="fas fa-circle"></i> <span id="reqLowercaseText">Contains lowercase letter</span>
-          </div>
-          <div class="requirement unmet" id="reqUppercase">
-            <i class="fas fa-circle"></i> <span id="reqUppercaseText">Contains uppercase letter</span>
-          </div>
-          <div class="requirement unmet" id="reqNumber">
-            <i class="fas fa-circle"></i> <span id="reqNumberText">Contains number</span>
-          </div>
+        
+        <div class="password-strength-container">
+            <div class="password-strength-meter">
+              <div class="password-strength-bar" id="passwordStrengthBar"></div>
+            </div>
+            <div class="password-requirements" id="passwordRequirements">
+              <div class="requirement unmet" id="reqLength"><i class="fas fa-circle"></i> <span id="reqLengthText">At least 8 characters</span></div>
+              <div class="requirement unmet" id="reqLowercase"><i class="fas fa-circle"></i> <span id="reqLowercaseText">Contains lowercase letter</span></div>
+              <div class="requirement unmet" id="reqUppercase"><i class="fas fa-circle"></i> <span id="reqUppercaseText">Contains uppercase letter</span></div>
+              <div class="requirement unmet" id="reqNumber"><i class="fas fa-circle"></i> <span id="reqNumberText">Contains number</span></div>
+            </div>
         </div>
       </div>
 
-      <div class="input-group">
-   <select name="role" id="role" required aria-label="Select Role">
+      <div class="input-group select-wrapper">
+        <select name="role" id="role" required aria-label="Select Role">
           <option value="">Select Role</option>
           <option value="Farmer">Farmer</option>
           <option value="Market-entity">Market-Entity</option>
         </select>
       </div>
 
-      <div class="input-group">
-        <label for="image_url" id="imageLabel">Profile Image</label>
-        <div class="file-input">
-          <label class="file-input-label" id="fileLabel">
-            <i class="fas fa-cloud-upload-alt"></i> Choose a file
-          </label>
-          <input type="file" name="image_url" id="image_url" accept="image/*" aria-label="Profile Image">
-        </div>
+      <div class="input-group file-input">
+        <label for="image_url" class="file-input-label" id="fileLabel">
+          <i class="fas fa-cloud-upload-alt"></i> <span id="fileText">Choose Profile Image</span>
+        </label>
+        <input type="file" name="image_url" id="image_url" accept="image/*" aria-label="Profile Image">
       </div>
 
-      <button type="submit" class="btn" id="submitBtn" disabled>Sign Up</button>
+      <button type="submit" class="btn" id="submitBtn" disabled>SIGN UP</button>
 
       <div class="separator">
         <span id="separatorText">OR</span>
@@ -650,65 +461,33 @@
     function checkPasswordStrength(password) {
       let strength = 0;
       const requirements = {
-        hasLength: false,
-        hasLowercase: false,
-        hasUppercase: false,
-        hasNumber: false
+        hasLength: password.length >= 8,
+        hasLowercase: /[a-z]/.test(password),
+        hasUppercase: /[A-Z]/.test(password),
+        hasNumber: /[0-9]/.test(password)
       };
       
-      // Check length
-      if (password.length >= 8) {
-        strength += 25;
-        requirements.hasLength = true;
-        document.getElementById('reqLength').classList.replace('unmet', 'met');
-      } else {
-        document.getElementById('reqLength').classList.replace('met', 'unmet');
-      }
+      if (requirements.hasLength) { strength += 25; document.getElementById('reqLength').classList.replace('unmet', 'met'); } 
+      else { document.getElementById('reqLength').classList.replace('met', 'unmet'); }
       
-      // Check lowercase
-      if (/[a-z]/.test(password)) {
-        strength += 25;
-        requirements.hasLowercase = true;
-        document.getElementById('reqLowercase').classList.replace('unmet', 'met');
-      } else {
-        document.getElementById('reqLowercase').classList.replace('met', 'unmet');
-      }
+      if (requirements.hasLowercase) { strength += 25; document.getElementById('reqLowercase').classList.replace('unmet', 'met'); }
+      else { document.getElementById('reqLowercase').classList.replace('met', 'unmet'); }
       
-      // Check uppercase
-      if (/[A-Z]/.test(password)) {
-        strength += 25;
-        requirements.hasUppercase = true;
-        document.getElementById('reqUppercase').classList.replace('unmet', 'met');
-      } else {
-        document.getElementById('reqUppercase').classList.replace('met', 'unmet');
-      }
+      if (requirements.hasUppercase) { strength += 25; document.getElementById('reqUppercase').classList.replace('unmet', 'met'); }
+      else { document.getElementById('reqUppercase').classList.replace('met', 'unmet'); }
       
-      // Check number
-      if (/[0-9]/.test(password)) {
-        strength += 25;
-        requirements.hasNumber = true;
-        document.getElementById('reqNumber').classList.replace('unmet', 'met');
-      } else {
-        document.getElementById('reqNumber').classList.replace('met', 'unmet');
-      }
+      if (requirements.hasNumber) { strength += 25; document.getElementById('reqNumber').classList.replace('unmet', 'met'); }
+      else { document.getElementById('reqNumber').classList.replace('met', 'unmet'); }
       
-      // Update strength bar
       const strengthBar = document.getElementById('passwordStrengthBar');
       strengthBar.style.width = `${strength}%`;
       
-      // Set color based on strength
-      if (strength === 0) {
-        strengthBar.style.backgroundColor = '#dc3545';
-      } else if (strength < 100) {
-        strengthBar.style.backgroundColor = '#fd7e14';
-      } else {
-        strengthBar.style.backgroundColor = '#28a745';
-      }
+      if (strength <= 25) strengthBar.style.backgroundColor = '#e74c3c'; // Red
+      else if (strength <= 75) strengthBar.style.backgroundColor = '#f1c40f'; // Yellow
+      else strengthBar.style.backgroundColor = '#27ae60'; // Green
       
-      // Enable/disable submit button based on all requirements
       const submitBtn = document.getElementById('submitBtn');
-      if (requirements.hasLength && requirements.hasLowercase && 
-          requirements.hasUppercase && requirements.hasNumber) {
+      if (requirements.hasLength && requirements.hasLowercase && requirements.hasUppercase && requirements.hasNumber) {
         submitBtn.disabled = false;
       } else {
         submitBtn.disabled = true;
@@ -719,36 +498,42 @@
 
     function changeLanguage() {
       const lang = document.getElementById('languageSelect').value;
+      const fileText = document.getElementById('fileText');
+      
       if (lang === 'ph') {
-        document.getElementById('formTitle').innerText = 'Magparehistro';
+        document.getElementById('formTitle').innerText = 'MAGPAREHISTRO';
         document.getElementById('firstName').placeholder = 'Pangalan';
         document.getElementById('lastName').placeholder = 'Apelyido';
-        document.getElementById('username').placeholder = 'Username';
+        document.getElementById('username').placeholder = 'Pangalan ng Gumagamit';
         document.getElementById('email').placeholder = 'Email';
         document.getElementById('password').placeholder = 'Password';
-        document.getElementById('imageLabel').innerText = 'Larawan ng Profile';
-        document.getElementById('fileLabel').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Pumili ng file';
-        document.getElementById('submitBtn').innerText = 'Magparehistro';
+        fileText.innerText = 'Pumili ng Larawan';
+        document.getElementById('submitBtn').innerText = 'MAGPAREHISTRO';
         document.getElementById('separatorText').innerText = 'O';
+        document.getElementById('loginText').innerHTML = 'May account na? <a href="{% url "login" %}">Mag-login dito</a>';
         
-        // Translate password requirements
+        const roleSelect = document.querySelector('select[name="role"]');
+        if(roleSelect.options[0].value === "") roleSelect.options[0].textContent = 'Pumili ng Papel';
+
         document.getElementById('reqLengthText').innerText = 'Hindi bababa sa 8 na karakter';
         document.getElementById('reqLowercaseText').innerText = 'May maliit na titik';
         document.getElementById('reqUppercaseText').innerText = 'May malaking titik';
         document.getElementById('reqNumberText').innerText = 'May numero';
       } else {
-        document.getElementById('formTitle').innerText = 'Sign Up';
+        document.getElementById('formTitle').innerText = 'SIGN UP';
         document.getElementById('firstName').placeholder = 'First Name';
         document.getElementById('lastName').placeholder = 'Last Name';
         document.getElementById('username').placeholder = 'Username';
         document.getElementById('email').placeholder = 'Email';
         document.getElementById('password').placeholder = 'Password';
-        document.getElementById('imageLabel').innerText = 'Profile Image';
-        document.getElementById('fileLabel').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Choose a file';
-        document.getElementById('submitBtn').innerText = 'Sign Up';
+        fileText.innerText = 'Choose Profile Image';
+        document.getElementById('submitBtn').innerText = 'SIGN UP';
         document.getElementById('separatorText').innerText = 'OR';
+        document.getElementById('loginText').innerHTML = 'Already have an account? <a href="{% url "login" %}">Login here</a>';
         
-        // Reset password requirements to English
+        const roleSelect = document.querySelector('select[name="role"]');
+        if(roleSelect.options[0].value === "") roleSelect.options[0].textContent = 'Select Role';
+
         document.getElementById('reqLengthText').innerText = 'At least 8 characters';
         document.getElementById('reqLowercaseText').innerText = 'Contains lowercase letter';
         document.getElementById('reqUppercaseText').innerText = 'Contains uppercase letter';
@@ -756,38 +541,23 @@
       }
     }
 
-    // Password strength real-time validation
     document.getElementById('password').addEventListener('input', function(e) {
       checkPasswordStrength(e.target.value);
     });
 
-    // Form submission validation
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
-      const password = document.getElementById('password').value;
-      const requirements = checkPasswordStrength(password);
-      
-      if (!requirements.hasLength || !requirements.hasLowercase || 
-          !requirements.hasUppercase || !requirements.hasNumber) {
-        e.preventDefault();
-        alert('Password must meet all requirements before submitting.');
-        return false;
-      }
-    });
-
-    // Update file input label when file is selected
     document.getElementById('image_url').addEventListener('change', function(e) {
-      const fileName = e.target.files[0] ? e.target.files[0].name : 'Choose a file';
-      const label = document.getElementById('fileLabel');
+      const fileName = e.target.files[0] ? e.target.files[0].name : '';
       const lang = document.getElementById('languageSelect').value;
+      const baseText = lang === 'ph' ? 'Pumili ng Larawan' : 'Choose Profile Image';
+      const fileText = document.getElementById('fileText');
       
-      if (lang === 'ph') {
-        label.innerHTML = `<i class="fas fa-file-image"></i> ${fileName || 'Pumili ng file'}`;
+      if(fileName) {
+          fileText.innerText = fileName.length > 20 ? fileName.substring(0, 17) + "..." : fileName;
       } else {
-        label.innerHTML = `<i class="fas fa-file-image"></i> ${fileName || 'Choose a file'}`;
+          fileText.innerText = baseText;
       }
     });
 
-    // Initialize password validation on page load
     document.addEventListener('DOMContentLoaded', function() {
       checkPasswordStrength('');
     });

@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - BANAeScan</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
- <style>
+  <style>
+    /* 1. ADOPTED VARIABLES FROM YOUR NEW STYLE */
     :root {
       --dark-brown: #2F1609;
       --medium-brown: #704210;
@@ -16,8 +17,9 @@
       --bright-gold: #FBD242;
       --white: #FFFFFF;
       --light-bg: #FFF9EC;
-      --card-shadow: 0 10px 40px rgba(47, 22, 9, 0.15);
-      --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --surface: #FFFCF4;
+      --shadow-lg: 0 15px 35px rgba(0,0,0,0.25);
+      --shadow-sm: 0 8px 30px rgba(0,0,0,0.15);
     }
 
     * {
@@ -27,33 +29,38 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-image: url("{% static 'img/bc1.png' %}");
+      /* Requested: Keep specific background image */
+      background: linear-gradient(135deg, rgba(47, 22, 9, 0.8), rgba(112, 66, 16, 0.7)), url("{% static 'img/bc1.png' %}");
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       padding: 20px;
+      color: var(--dark-brown);
     }
 
+    /* GLASSMORPHISM CONTAINER */
     .login-container {
       width: 100%;
-      max-width: 460px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      box-shadow: var(--card-shadow);
-      padding: 40px 35px;
+      max-width: 440px;
+      /* Adopted glass style */
+      background: rgba(255, 252, 244, 0.95);
+      border: 1px solid rgba(251, 210, 66, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      padding: 40px 32px;
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(251, 213, 118, 0.4);
       animation: fadeInUp 0.6s ease-out;
     }
 
+    /* Top Gold Line Decoration */
     .login-container::before {
       content: '';
       position: absolute;
@@ -64,77 +71,60 @@
       background: linear-gradient(to right, var(--gold), var(--bright-gold));
     }
 
+    /* LOGO STYLING */
     .logo-container {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       position: relative;
     }
 
     .logo {
-      width: 110px;
-      height: 110px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       border: 3px solid var(--bright-gold);
       object-fit: cover;
-      box-shadow: 0 6px 20px rgba(218, 148, 8, 0.25);
-      transition: var(--transition);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      background: var(--white);
+      padding: 4px;
     }
 
-    .logo:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 25px rgba(218, 148, 8, 0.4);
-    }
-
+    /* TYPOGRAPHY */
     .form-title {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 800;
       color: var(--medium-brown);
       text-align: center;
-      margin-bottom: 30px;
-      position: relative;
+      margin-bottom: 24px;
       letter-spacing: -0.5px;
     }
 
-    .form-title::after {
-      content: '';
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70px;
-      height: 4px;
-      background: linear-gradient(to right, var(--gold), var(--bright-gold));
-      border-radius: 4px;
-    }
-
+    /* INPUT GROUPS */
     .input-group {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       position: relative;
     }
 
     .input-group input,
     .input-group select {
       width: 100%;
-      padding: 16px 52px 16px 20px;
+      padding: 14px 45px 14px 20px;
       font-size: 16px;
-      border: 2px solid rgba(112, 66, 16, 0.15);
-      border-radius: 12px;
-      background-color: rgba(255, 255, 255, 0.9);
-      transition: var(--transition);
+      font-family: inherit;
       color: var(--dark-brown);
-      font-weight: 500;
+      background-color: var(--white);
+      border: 1px solid rgba(112, 66, 16, 0.2);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      appearance: none; /* Removes default dropdown arrow to style custom */
     }
 
     .input-group input:focus,
     .input-group select:focus {
       border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(218, 148, 8, 0.2);
+      box-shadow: 0 0 0 4px rgba(218, 148, 8, 0.15);
       outline: none;
       transform: translateY(-2px);
-    }
-
-    .input-group input::placeholder {
-      color: rgba(112, 66, 16, 0.5);
     }
 
     .input-group i {
@@ -144,71 +134,77 @@
       transform: translateY(-50%);
       color: var(--gold);
       font-size: 18px;
+      pointer-events: none;
     }
 
+    /* Custom select arrow since we removed default */
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '\f078'; /* FontAwesome Chevron Down */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    /* BUTTON STYLING - ADOPTED FROM .btn-primary */
     .btn {
       width: 100%;
-      padding: 17px;
-      font-size: 18px;
+      padding: 16px;
+      font-size: 16px;
       font-weight: 700;
+      letter-spacing: 0.05em;
       border: none;
       border-radius: 12px;
-      color: var(--white);
+      color: var(--dark-brown);
       background: linear-gradient(135deg, var(--gold), var(--bright-gold));
       cursor: pointer;
-      transition: var(--transition);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 20px rgba(218, 148, 8, 0.3);
       margin-top: 10px;
-      box-shadow: 0 6px 20px rgba(218, 148, 8, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.7s;
+      text-transform: uppercase;
     }
 
     .btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(218, 148, 8, 0.4);
-    }
-
-    .btn:hover::before {
-      left: 100%;
+      box-shadow: 0 15px 30px rgba(218, 148, 8, 0.4);
     }
 
     .btn:active {
       transform: translateY(-1px);
     }
 
+    /* LINKS */
     .forgot-password {
       display: block;
       text-align: right;
-      margin-top: -10px;
-      margin-bottom: 25px;
+      margin-top: -8px;
+      margin-bottom: 24px;
       color: var(--light-brown);
-      font-size: 15px;
+      font-size: 14px;
+      font-weight: 600;
       text-decoration: none;
-      transition: var(--transition);
-      font-weight: 500;
+      transition: color 0.3s;
     }
 
     .forgot-password:hover {
       color: var(--gold);
-      text-decoration: underline;
     }
 
     .separator {
       display: flex;
       align-items: center;
-      margin: 30px 0;
-      color: var(--medium-brown);
+      margin: 24px 0;
+      color: var(--light-brown);
+      font-size: 13px;
+      font-weight: 600;
     }
 
     .separator::before,
@@ -216,278 +212,167 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      background: rgba(218, 148, 8, 0.3);
     }
 
     .separator span {
       padding: 0 15px;
-      font-size: 14px;
-      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
 
     .signup-text {
       text-align: center;
       color: var(--medium-brown);
-      margin-top: 25px;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .signup-text a {
-      color: var(--gold);
+      color: var(--dark-brown);
       font-weight: 700;
       text-decoration: none;
-      transition: var(--transition);
-      position: relative;
-    }
-
-    .signup-text a::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--gold);
-      transition: width 0.3s;
+      border-bottom: 2px solid var(--gold);
+      transition: all 0.3s;
     }
 
     .signup-text a:hover {
-      color: var(--light-brown);
+      color: var(--gold);
+      border-color: transparent;
     }
 
-    .signup-text a:hover::after {
-      width: 100%;
-    }
-
-    .language-selector {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 10;
-    }
-
-    .language-selector select {
-      padding: 8px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--gold);
-      background-color: var(--white);
-      color: var(--medium-brown);
-      font-size: 14px;
-      cursor: pointer;
-      transition: var(--transition);
-      font-weight: 500;
-    }
-
-    .language-selector select:hover {
-      border-color: var(--light-brown);
-      box-shadow: 0 2px 8px rgba(112, 66, 16, 0.1);
+    /* UTILITIES: Language & Close */
+    .top-controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
     }
 
     .close-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: none;
-      border: none;
-      font-size: 24px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(112, 66, 16, 0.2);
+      background: rgba(255,255,255,0.5);
       color: var(--medium-brown);
       cursor: pointer;
-      transition: var(--transition);
-      z-index: 10;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.3s;
     }
 
     .close-btn:hover {
-      color: var(--gold);
-      background-color: rgba(218, 148, 8, 0.1);
+        background: var(--bright-gold);
+        border-color: var(--bright-gold);
+        color: var(--dark-brown);
     }
 
-    .message-container {
-      margin-bottom: 20px;
-      text-align: center;
+    .language-select {
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--gold);
+      background: rgba(255,255,255,0.8);
+      color: var(--dark-brown);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
     }
 
+    /* MESSAGES */
+    .message-container { margin-bottom: 20px; }
+    
+    .error-message, .info-message {
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
     .error-message {
-      color: #dc3545;
-      font-size: 15px;
-      margin-bottom: 10px;
-      padding: 12px 16px;
-      background-color: rgba(220, 53, 69, 0.1);
-      border-radius: 10px;
-      border-left: 4px solid #dc3545;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+        background: rgba(220, 53, 69, 0.1);
+        color: #d63031;
+        border: 1px solid rgba(220, 53, 69, 0.2);
     }
 
     .info-message {
-      color: #28a745;
-      font-size: 15px;
-      margin-bottom: 10px;
-      padding: 12px 16px;
-      background-color: rgba(40, 167, 69, 0.1);
-      border-radius: 10px;
-      border-left: 4px solid #28a745;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+        background: rgba(40, 167, 69, 0.1);
+        color: #218838;
+        border: 1px solid rgba(40, 167, 69, 0.2);
     }
 
     @keyframes fadeInUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(30px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0); 
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Mobile-first responsive design */
-    @media (max-width: 768px) {
-      body {
-        padding: 15px;
-        background-attachment: scroll;
-      }
-      
-      .login-container {
-        padding: 35px 25px;
-        border-radius: 18px;
-      }
-      
-      .form-title {
-        font-size: 28px;
-      }
-      
-      .logo {
-        width: 100px;
-        height: 100px;
-      }
-      
-      .input-group input,
-      .input-group select {
-        padding: 14px 48px 14px 18px;
-      }
-      
-      .btn {
-        padding: 16px;
-      }
+    /* --- RESPONSIVE MOBILE STYLES --- */
+    
+    /* Small Tablets & Large Phones */
+    @media (max-width: 600px) {
+        .login-container {
+            padding: 30px 24px;
+            max-width: 90%;
+        }
+        .form-title { font-size: 24px; margin-bottom: 20px; }
+        .logo { width: 80px; height: 80px; }
     }
 
+    /* Standard Mobile (iPhone, Pixel) */
     @media (max-width: 480px) {
-      .login-container {
-        padding: 30px 20px;
-        border-radius: 16px;
-      }
-      
-      .form-title {
-        font-size: 26px;
-        margin-bottom: 25px;
-      }
-      
-      .logo {
-        width: 90px;
-        height: 90px;
-      }
-      
-      .input-group {
-        margin-bottom: 20px;
-      }
-      
-      .input-group input,
-      .input-group select {
-        padding: 13px 44px 13px 16px;
-        font-size: 15px;
-      }
-      
-      .btn {
-        padding: 15px;
-        font-size: 17px;
-      }
-      
-      .close-btn {
-        top: 15px;
-        left: 15px;
-        width: 36px;
-        height: 36px;
-      }
-      
-      .language-selector {
-        top: 15px;
-        right: 15px;
-      }
-      
-      .forgot-password {
-        font-size: 14px;
-      }
-      
-      .signup-text {
-        font-size: 15px;
-      }
+        body { padding: 15px; }
+        .login-container {
+            padding: 25px 20px;
+            border-radius: 20px;
+        }
+        .input-group input, .input-group select {
+            padding: 12px 40px 12px 16px;
+            font-size: 15px;
+        }
+        .btn { padding: 14px; font-size: 15px; }
+        .signup-text { font-size: 14px; }
     }
 
+    /* Small Mobile (Galaxy Fold, Older iPhones) */
     @media (max-width: 360px) {
-      .login-container {
-        padding: 25px 18px;
-      }
-      
-      .form-title {
-        font-size: 24px;
-      }
-      
-      .logo {
-        width: 80px;
-        height: 80px;
-      }
-      
-      .input-group input,
-      .input-group select {
-        padding: 12px 40px 12px 14px;
-      }
+        .login-container { padding: 20px 16px; }
+        .logo { width: 70px; height: 70px; margin-bottom: 15px; }
+        .form-title { font-size: 22px; margin-bottom: 15px; }
+        .top-controls { top: 10px; left: 10px; right: 10px; }
+        .close-btn { width: 32px; height: 32px; font-size: 14px; }
+        .language-select { padding: 4px 10px; font-size: 12px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group i { font-size: 16px; right: 15px; }
     }
-
-    /* High contrast mode support */
-    @media (prefers-contrast: high) {
-      .login-container {
-        background: white;
-        border: 2px solid var(--dark-brown);
-      }
-      
-      .input-group input,
-      .input-group select {
-        border: 2px solid var(--dark-brown);
-      }
-    }
-
-    /* Reduced motion support */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
+    
+    /* Height-based media query for landscape mode on phones */
+    @media (max-height: 700px) {
+        body { padding: 10px; align-items: flex-start; overflow-y: auto; }
+        .login-container { margin: 20px auto; }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <button class="close-btn" onclick="window.location.href='{% url 'landing_page' %}'">
-      <i class="fas fa-times"></i>
-    </button>
 
-    <div class="language-selector">
-      <select id="languageSelect" onchange="changeLanguage()">
-        <option value="en">English</option>
-        <option value="ph">Tagalog</option>
-      </select>
+  <div class="login-container">
+    
+    <div class="top-controls">
+        <button class="close-btn" onclick="window.location.href='{% url 'landing_page' %}'">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <select id="languageSelect" class="language-select" onchange="changeLanguage()">
+          <option value="en">English</option>
+          <option value="ph">Tagalog</option>
+        </select>
     </div>
 
     <div class="logo-container">
@@ -514,23 +399,23 @@
 
     <form method="POST">
       {% csrf_token %}
-      <div class="input-group"> <i class="fas fa-user"></i>
+      <div class="input-group">
         <input type="text" name="username" placeholder="Username" required>
       </div>
       
       <div class="input-group">
-        <i class="fas fa-lock"></i>
         <input type="password" name="password" placeholder="Password" required>
+
       </div>
       
-      <div class="input-group">
+      <div class="input-group select-wrapper">
         <select name="role" required>
           <option value="" disabled selected>Select Role</option>
           <option value="Farmer">Farmer</option>
           <option value="Market-entity">Market-entity</option>
           <option value="Admin">Admin</option>
         </select>
-      </div>
+        </div>
 
       <a href="{% url 'forgot-password' %}" class="forgot-password">Forgot Password?</a>
 
@@ -553,7 +438,10 @@
         document.querySelector('.form-title').innerText = 'MAG-LOGIN';
         document.querySelector('input[name="username"]').placeholder = 'Pangalan ng Gumagamit';
         document.querySelector('input[name="password"]').placeholder = 'Password';
-        document.querySelector('select[name="role"] option[value=""]').textContent = 'Pumili ng Papel';
+        // Handle Select Option text manually since structure is simple
+        const roleSelect = document.querySelector('select[name="role"]');
+        if(roleSelect.options[0].value === "") roleSelect.options[0].textContent = 'Pumili ng Papel';
+        
         document.querySelector('.forgot-password').innerText = 'Nakalimutan ang Password?';
         document.querySelector('.btn').innerText = 'MAG-LOGIN';
         const signupURL = document.getElementById('signup-text').getAttribute('data-signup-url');
@@ -563,7 +451,10 @@
         document.querySelector('.form-title').innerText = 'LOGIN';
         document.querySelector('input[name="username"]').placeholder = 'Username';
         document.querySelector('input[name="password"]').placeholder = 'Password';
-        document.querySelector('select[name="role"] option[value=""]').textContent = 'Select Role';
+        
+        const roleSelect = document.querySelector('select[name="role"]');
+        if(roleSelect.options[0].value === "") roleSelect.options[0].textContent = 'Select Role';
+
         document.querySelector('.forgot-password').innerText = 'Forgot Password?';
         document.querySelector('.btn').innerText = 'LOGIN';
         const signupURL = document.getElementById('signup-text').getAttribute('data-signup-url');
@@ -573,4 +464,4 @@
     }
   </script>
 </body>
-</html
+</html>
