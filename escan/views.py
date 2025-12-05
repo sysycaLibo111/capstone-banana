@@ -8230,7 +8230,7 @@ def get_scanning_tip(condition, temperature, humidity):
     base_tip = tips.get(condition, 'Moderate scanning conditions')
     
     # Add temperature-specific advice
-    if temperature > 35:
+    if temperature >= 35:
         base_tip += f' High temperature ({temperature}°C) - protect equipment from overheating.'
     elif temperature < 10:
         base_tip += f' Cold temperature ({temperature}°C) - allow equipment to acclimate.'
