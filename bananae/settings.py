@@ -68,7 +68,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'capstone-banana.onrender.com', 'localhost,127.0.0.1').split(',')
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'capstone-banana.onrender.com', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'capstone-banana.onrender.com,localhost,127.0.0.1').split(',')
 AUTH_USER_MODEL = 'escan.CustomUser'
 AUTH_USER_MODEL = 'escan.CustomUser'
 
